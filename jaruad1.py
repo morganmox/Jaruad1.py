@@ -3,7 +3,7 @@ import random
 
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 800
-SCALE = 1.75
+SCALE = 1.5
 
 class Enemy(arcade.Sprite):
     def __init__(self,filename,scale):
@@ -52,28 +52,47 @@ class SpaceGameWindow(arcade.Window):
  
         arcade.set_background_color(arcade.color.BLACK)
         self.framecount = 0
+        #create all sprite array
         self.all_sprites_list = arcade.SpriteList()
+        self.enemy_sprites_list = arcade.SpriteList()
+        self.bullet_sprites_list = arcade.SpriteList()
+        #giving birth to player
         self.player_sprite = Ship("images/ship.png", SCALE)
         self.all_sprites_list.append(self.player_sprite)
 
     def on_draw(self):
+        #simply draw everything
         arcade.start_render()
         self.all_sprites_list.draw()
 
     def update(self,x):
         self.all_sprites_list.update()
         self.framecount+=1
-        if self.framecount%30==0:
+        #spawning enemy
+        if self.framecount>10:
             self.framecount = 0
-            self.enemy_sprite = Enemy("images/enemy.png", SCALE)
-            self.all_sprites_list.append(self.enemy_sprite)
+            for i in range(random.randrange(3)):
+                enemy = Enemy("images/enemy.png", SCALE)
+                self.enemy_sprites_list.append(enemy)
+                self.all_sprites_list.append(enemy)
+        #collision checking (bullet vs enemy)
+        for bullet in self.bullet_sprites_list:
+            hit = arcade.check_for_collision_with_list(bullet,self.enemy_sprites_list)
+            #both bullet and enemy got killed for collision
+            if len(hit)>0:
+                bullet.kill()
+            for enemy in hit:
+                enemy.kill()
             
     def on_key_press(self, symbol, modifiers):
+        #pew pew
         if symbol == arcade.key.SPACE:
             bullet = Bullet("images/bullet.png",SCALE)
             bullet.center_x = self.player_sprite.center_x
             bullet.bottom = self.player_sprite.top
-            self.all_sprites_list.append(bullet)   
+            self.bullet_sprites_list.append(bullet)
+            self.all_sprites_list.append(bullet)
+        #moving
         if symbol == arcade.key.LEFT:
             self.player_sprite.vx = -1
         elif symbol == arcade.key.RIGHT:
@@ -84,6 +103,7 @@ class SpaceGameWindow(arcade.Window):
             self.player_sprite.vy = -1
             
     def on_key_release(self, symbol, modifiers):
+        #stop moving
         if symbol == arcade.key.LEFT:
             self.player_sprite.vx = 0
         elif symbol == arcade.key.RIGHT:
