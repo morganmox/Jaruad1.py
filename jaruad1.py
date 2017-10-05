@@ -16,6 +16,15 @@ class Ship(arcade.Sprite):
         self.center_x+=self.vx*5
         self.center_y+=self.vy*5
 
+        if self.center_x>SCREEN_WIDTH:
+            self.center_x = 0
+        if self.center_x<0:
+            self.center_x = SCREEN_WIDTH
+        if self.center_y>SCREEN_HEIGHT:
+            self.center_y = 0
+        if self.center_y<0:
+            self.center_y = SCREEN_HEIGHT
+
         super().update()
 
 class SpaceGameWindow(arcade.Window):
