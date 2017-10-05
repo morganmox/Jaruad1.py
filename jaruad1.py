@@ -1,8 +1,29 @@
 import arcade
+import random
 
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 800
-SCALE = 1
+SCALE = 1.75
+
+class Enemy(arcade.Sprite):
+    def __init__(self,filename,scale):
+        super().__init__(filename,scale)
+        self.center_y = SCREEN_HEIGHT
+        self.center_x = random.randrange(SCREEN_WIDTH)
+        
+    def update(self):
+        self.center_y-=5
+        if self.center_y<0:
+            self.kill()
+
+class Bullet(arcade.Sprite):
+    def __init__(self,filename,scale):
+        super().__init__(filename,scale)
+
+    def update(self):
+        self.center_y+=8
+        if self.center_y>SCREEN_HEIGHT:
+            self.kill()
 
 class Ship(arcade.Sprite):
     def __init__(self,filename,scale):
@@ -23,15 +44,14 @@ class Ship(arcade.Sprite):
         if self.center_y>SCREEN_HEIGHT:
             self.center_y = 0
         if self.center_y<0:
-            self.center_y = SCREEN_HEIGHT
-
-        super().update()
+            self.center_y = SCREEN_HEIGHT  
 
 class SpaceGameWindow(arcade.Window):
     def __init__(self, width, height):
         super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT)
  
         arcade.set_background_color(arcade.color.BLACK)
+        self.framecount = 0
         self.all_sprites_list = arcade.SpriteList()
         self.player_sprite = Ship("images/ship.png", SCALE)
         self.all_sprites_list.append(self.player_sprite)
@@ -42,8 +62,18 @@ class SpaceGameWindow(arcade.Window):
 
     def update(self,x):
         self.all_sprites_list.update()
-
+        self.framecount+=1
+        if self.framecount%30==0:
+            self.framecount = 0
+            self.enemy_sprite = Enemy("images/enemy.png", SCALE)
+            self.all_sprites_list.append(self.enemy_sprite)
+            
     def on_key_press(self, symbol, modifiers):
+        if symbol == arcade.key.SPACE:
+            bullet = Bullet("images/bullet.png",SCALE)
+            bullet.center_x = self.player_sprite.center_x
+            bullet.bottom = self.player_sprite.top
+            self.all_sprites_list.append(bullet)   
         if symbol == arcade.key.LEFT:
             self.player_sprite.vx = -1
         elif symbol == arcade.key.RIGHT:
