@@ -3,7 +3,7 @@ import random
 #Must match with main program's setting for accurate display
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 800
-SCALE = 1.5
+SCALE = 1.2
 
 class EnemySubmarine(arcade.Sprite):
     def __init__(self,filename,scale):
@@ -12,7 +12,7 @@ class EnemySubmarine(arcade.Sprite):
         self.center_x = SCREEN_WIDTH
         
     def update(self):
-        self.center_x-=5
+        self.center_x-=random.randrange(15)
         if self.center_x<0:
             self.kill()
 
@@ -21,7 +21,7 @@ class Torpedo(arcade.Sprite):
         super().__init__(filename,scale)
 
     def update(self):
-        self.center_y-=10
+        self.center_y-=7
         if self.center_y<0:
             self.kill()
 

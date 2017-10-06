@@ -1,10 +1,11 @@
 import arcade
 import random
+import sys
 from models import Enemy,Bullet,Ship,EnemySubmarine,Torpedo,Greenfoot
 
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 800
-SCALE = 1.5
+SCALE = 1.2
 
 class SpaceGameWindow(arcade.Window):
     def __init__(self, width, height):
@@ -71,14 +72,14 @@ class SpaceGameWindow(arcade.Window):
             self.lv2 = True
             self.framecount2+=1
             for enemysub in self.enemysub_sprites_list:
-                if random.randrange(100)<2:
+                if random.randrange(100)<3:
                     torpedo = Torpedo("images/torpedo.png", SCALE)
                     torpedo.center_x = enemysub.center_x
                     torpedo.top = enemysub.bottom
                     self.torpedo_sprites_list.append(torpedo)
                     self.all_sprites_list.append(torpedo)
                 
-        if self.framecount2>40 and self.gameover!=True and self.lv2 == True:
+        if self.framecount2>25 and self.gameover!=True and self.lv2 == True:
             self.framecount2 = 0
             enemysub = EnemySubmarine("images/enemysub.png", SCALE)
             self.enemysub_sprites_list.append(enemysub)
@@ -91,8 +92,8 @@ class SpaceGameWindow(arcade.Window):
             self.speed_list.append(speeder)
             self.all_sprites_list.append(speeder)
  
-        #multigun upgrade deployed (score>45)
-        if self.score>= 45 and self.gundropped == False:
+        #multigun upgrade deployed (score>60)
+        if self.score>= 60 and self.gundropped == False:
             self.gundropped = True
             gun = Greenfoot("images/d.png", SCALE)
             self.gun_list.append(gun)
@@ -145,6 +146,8 @@ class SpaceGameWindow(arcade.Window):
         if self.gameover == True:
             self.player_sprite.kill()
             print("Game Over")
+            print("Final score = ",self.score)
+            sys.exit()
             
     def on_key_press(self, symbol, modifiers):
         #pew pew
