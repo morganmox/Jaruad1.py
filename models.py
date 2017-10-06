@@ -30,9 +30,10 @@ class Enemy(arcade.Sprite):
         super().__init__(filename,scale)
         self.center_y = SCREEN_HEIGHT
         self.center_x = random.randrange(SCREEN_WIDTH)
+        self.vy = random.randrange(5)+5
         
     def update(self):
-        self.center_y-=8
+        self.center_y-=self.vy
         if self.center_y<0:
             self.kill()
 

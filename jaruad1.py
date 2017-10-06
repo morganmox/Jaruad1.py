@@ -1,4 +1,5 @@
 import arcade
+import random
 from models import Enemy,Bullet,Ship,EnemySubmarine,Torpedo
 
 SCREEN_WIDTH = 800
@@ -14,7 +15,6 @@ class SpaceGameWindow(arcade.Window):
         self.set_mouse_visible(False)
         self.framecount = 0 #enemy
         self.framecount2 = 0 #enemysubmarine
-        self.framecount3 = 0 #torpedo
         #scoring/hpremaining
         self.score = 0
         self.score_text = None
@@ -60,20 +60,18 @@ class SpaceGameWindow(arcade.Window):
             self.all_sprites_list.append(enemy)
 
         #spawning enemy level 2
-        if self.score>=50:
+        if self.score>=5:
             self.lv2 = True
             self.framecount2+=1
-            self.framecount3+=1
-            if self.framecount3 > 25:
-                self.framecount3 = 0
-                for enemysub in self.enemysub_sprites_list:
+            for enemysub in self.enemysub_sprites_list:
+                if random.randrange(100)<2:
                     torpedo = Torpedo("images/torpedo.png", SCALE)
                     torpedo.center_x = enemysub.center_x
                     torpedo.top = enemysub.bottom
                     self.torpedo_sprites_list.append(torpedo)
                     self.all_sprites_list.append(torpedo)
                 
-        if self.framecount2>70 and self.gameover!=True and self.lv2 == True:
+        if self.framecount2>40 and self.gameover!=True and self.lv2 == True:
             self.framecount2 = 0
             enemysub = EnemySubmarine("images/enemysub.png", SCALE)
             self.enemysub_sprites_list.append(enemysub)
