@@ -1,6 +1,6 @@
 import arcade
 import random
-from models import Enemy,Bullet,Ship,EnemySubmarine,Torpedo
+from models import Enemy,Bullet,Ship,EnemySubmarine,Torpedo,Greenfoot
 
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 800
@@ -12,23 +12,30 @@ class SpaceGameWindow(arcade.Window):
 
         #whatever setting
         arcade.set_background_color(arcade.color.AMAZON)
-        self.set_mouse_visible(False)
+        self.set_mouse_visible(False) #hide cursor
         self.framecount = 0 #enemy
         self.framecount2 = 0 #enemysubmarine
-        #scoring/hpremaining
+        #scoring/hpremaining/upgrades
         self.score = 0
         self.score_text = None
-        self.hp = 3
+        self.hp = 5
         self.hp_text = None
         self.gameover = False
+        self.speedup = 0
+        self.speeddropped = False
+        self.multigun = False
+        self.gundropped = False
         #Level
         self.lv2 = False
+        self.lv3 = False
         #create all sprite array
         self.all_sprites_list = arcade.SpriteList()
         self.enemy_sprites_list = arcade.SpriteList()
         self.enemysub_sprites_list = arcade.SpriteList()
         self.torpedo_sprites_list = arcade.SpriteList()
         self.bullet_sprites_list = arcade.SpriteList()
+        self.gun_list = arcade.SpriteList()
+        self.speed_list = arcade.SpriteList()
         #giving birth to player
         self.player_sprite = Ship("images/ship.png", SCALE)
         self.all_sprites_list.append(self.player_sprite)
@@ -53,14 +60,14 @@ class SpaceGameWindow(arcade.Window):
         self.framecount+=1
 
         #spawning enemy
-        if self.framecount>8 and self.gameover!=True:
+        if self.framecount>7 and self.gameover!=True:
             self.framecount = 0
             enemy = Enemy("images/enemy.png", SCALE)
             self.enemy_sprites_list.append(enemy)
             self.all_sprites_list.append(enemy)
 
-        #spawning enemy level 2
-        if self.score>=5:
+        #spawning enemy level 2 (score>50)
+        if self.score>=50:
             self.lv2 = True
             self.framecount2+=1
             for enemysub in self.enemysub_sprites_list:
@@ -77,6 +84,20 @@ class SpaceGameWindow(arcade.Window):
             self.enemysub_sprites_list.append(enemysub)
             self.all_sprites_list.append(enemysub)
 
+        #speedup upgrade deployed (score>25)
+        if self.score>= 25 and self.speeddropped == False:
+            self.speeddropped = True
+            speeder = Greenfoot("images/greenfoot.png", SCALE)
+            self.speed_list.append(speeder)
+            self.all_sprites_list.append(speeder)
+ 
+        #multigun upgrade deployed (score>45)
+        if self.score>= 45 and self.gundropped == False:
+            self.gundropped = True
+            gun = Greenfoot("images/d.png", SCALE)
+            self.gun_list.append(gun)
+            self.all_sprites_list.append(gun)
+            
         #collision checking (bullet vs enemies)
         for bullet in self.bullet_sprites_list:
             hit = arcade.check_for_collision_with_list(bullet,self.enemy_sprites_list)
@@ -92,41 +113,64 @@ class SpaceGameWindow(arcade.Window):
                 enemysub.kill()
                 self.score+=2
 
-        #collision checking (enemies vs player)       
-        hit = arcade.check_for_collision_with_list(self.player_sprite,self.enemy_sprites_list)
+        #collision checking (enemies/upgrade vs player)       
+        hit = arcade.check_for_collision_with_list(self.player_sprite,self.enemy_sprites_list)#player vs tank
         if len(hit)!=0:
             for enemy in hit:
                 enemy.kill()
             self.hp-=1
-        hit2 = arcade.check_for_collision_with_list(self.player_sprite,self.torpedo_sprites_list)
+        hit2 = arcade.check_for_collision_with_list(self.player_sprite,self.torpedo_sprites_list)#player vs torpedo
         if len(hit2)!=0:
             for torpedo in hit2:
                 torpedo.kill()
             self.hp-=1
+        if self.speeddropped == True:
+            hit3 = arcade.check_for_collision_with_list(self.player_sprite,self.speed_list)#player vs speedup
+            if len(hit3)!=0:
+                for speeder in hit3:
+                    speeder.kill()
+                    self.speedup += 1
+                    print("Speedup activate")
+        if self.gundropped == True:
+            hit4 = arcade.check_for_collision_with_list(self.player_sprite,self.gun_list)#player vs multigun
+            if len(hit4)!=0:
+                for gun in hit4:
+                    gun.kill()
+                    self.multigun = True
+                    print("Multigun activate")
+
         #gameover status
         if self.hp == 0:
             self.gameover = True
         if self.gameover == True:
             self.player_sprite.kill()
+            print("Game Over")
             
     def on_key_press(self, symbol, modifiers):
         #pew pew
-        if symbol == arcade.key.SPACE:
-            bullet = Bullet("images/bullet.png",SCALE)
-            bullet.center_x = self.player_sprite.center_x
-            bullet.bottom = self.player_sprite.top
-            self.bullet_sprites_list.append(bullet)
-            self.all_sprites_list.append(bullet)
+        if symbol == arcade.key.SPACE and self.gameover != True:
+            if self.multigun == True:#upgrade
+                for i in range(3):
+                    bullet = Bullet("images/bullet.png",SCALE*0.9)
+                    bullet.center_x = self.player_sprite.center_x-(self.player_sprite.width/2*(i-1))
+                    bullet.bottom = self.player_sprite.top
+                    self.bullet_sprites_list.append(bullet)
+                    self.all_sprites_list.append(bullet)
+            else :#no upgrade
+                bullet = Bullet("images/bullet.png",SCALE*0.9)
+                bullet.center_x = self.player_sprite.center_x
+                bullet.bottom = self.player_sprite.top
+                self.bullet_sprites_list.append(bullet)
+                self.all_sprites_list.append(bullet)
         #moving
         if symbol == arcade.key.LEFT:
-            self.player_sprite.vx = -1
+            self.player_sprite.vx = -1-self.speedup
         elif symbol == arcade.key.RIGHT:
-            self.player_sprite.vx = 1
+            self.player_sprite.vx = 1+self.speedup
         if symbol == arcade.key.UP:
-            self.player_sprite.vy = 1
+            self.player_sprite.vy = 1+self.speedup
         elif symbol == arcade.key.DOWN:
-            self.player_sprite.vy = -1
-            
+            self.player_sprite.vy = -1-self.speedup         
     def on_key_release(self, symbol, modifiers):
         #stop moving
         if symbol == arcade.key.LEFT:
