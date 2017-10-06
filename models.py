@@ -3,7 +3,7 @@ import random
 #Must match with main program's setting for accurate display
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 800
-SCALE = 1.2
+SCALE = 1.4
 
 class EnemySubmarine(arcade.Sprite):
     def __init__(self,filename,scale):

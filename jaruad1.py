@@ -5,7 +5,7 @@ from models import Enemy,Bullet,Ship,EnemySubmarine,Torpedo,Greenfoot
 
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 800
-SCALE = 1.2
+SCALE = 1.4
 
 class SpaceGameWindow(arcade.Window):
     def __init__(self, width, height):
@@ -16,6 +16,7 @@ class SpaceGameWindow(arcade.Window):
         self.set_mouse_visible(False) #hide cursor
         self.framecount = 0 #enemy
         self.framecount2 = 0 #enemysubmarine
+        self.framecount3 = 0 #fence
         #scoring/hpremaining/upgrades
         self.score = 0
         self.score_text = None
@@ -37,8 +38,9 @@ class SpaceGameWindow(arcade.Window):
         self.bullet_sprites_list = arcade.SpriteList()
         self.gun_list = arcade.SpriteList()
         self.speed_list = arcade.SpriteList()
+        self.fence_list = arcade.SpriteList()
         #giving birth to player
-        self.player_sprite = Ship("images/ship.png", SCALE)
+        self.player_sprite = Ship("images/ship.png", SCALE*0.95)
         self.all_sprites_list.append(self.player_sprite)
 
     def on_draw(self):
@@ -59,6 +61,7 @@ class SpaceGameWindow(arcade.Window):
     def update(self,x):
         self.all_sprites_list.update()
         self.framecount+=1
+        self.framecount3+=1
 
         #spawning enemy
         if self.framecount>7 and self.gameover!=True:
@@ -72,7 +75,7 @@ class SpaceGameWindow(arcade.Window):
             self.lv2 = True
             self.framecount2+=1
             for enemysub in self.enemysub_sprites_list:
-                if random.randrange(100)<3:
+                if random.randrange(100)<1:
                     torpedo = Torpedo("images/torpedo.png", SCALE)
                     torpedo.center_x = enemysub.center_x
                     torpedo.top = enemysub.bottom
@@ -84,6 +87,15 @@ class SpaceGameWindow(arcade.Window):
             enemysub = EnemySubmarine("images/enemysub.png", SCALE)
             self.enemysub_sprites_list.append(enemysub)
             self.all_sprites_list.append(enemysub)
+
+        #spawning fence
+        if self.framecount3>80 and self.gameover!=True:
+            self.framecount3 = 0
+            fence = Torpedo("images/fence.png", SCALE)
+            fence.center_y = SCREEN_HEIGHT
+            fence.center_x = random.randrange(SCREEN_WIDTH)
+            self.fence_list.append(fence)
+            self.all_sprites_list.append(fence)
 
         #speedup upgrade deployed (score>25)
         if self.score>= 25 and self.speeddropped == False:
@@ -139,6 +151,10 @@ class SpaceGameWindow(arcade.Window):
                     gun.kill()
                     self.multigun = True
                     print("Multigun activate")
+
+        hit5 = arcade.check_for_collision_with_list(self.player_sprite,self.fence_list)#player vs fence
+        if len(hit5)!=0:
+            self.hp = 0
 
         #gameover status
         if self.hp == 0:
