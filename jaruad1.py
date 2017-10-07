@@ -17,13 +17,15 @@ class SpaceGameWindow(arcade.Window):
         #scoring/starting hp/upgrades
         self.score = 0
         self.score_text = None
-        self.hp = 10
+        self.hp = 30
         self.hp_text = None
         self.gameover = False
         self.speedup = 0
         self.speeddropped = False
         self.multigun = False
         self.gundropped = False
+        self.automatic = False
+        self.autodropped = False
         #Level
         self.lv2 = False
         self.lv3 = False
@@ -36,6 +38,7 @@ class SpaceGameWindow(arcade.Window):
         self.enemyair_sprites_list = arcade.SpriteList()
         self.enemyred_sprites_list = arcade.SpriteList()
         self.enemyred_bullet_sprites_list = arcade.SpriteList()
+        self.gun_auto_list = arcade.SpriteList()
         self.bullet_sprites_list = arcade.SpriteList()
         self.gun_list = arcade.SpriteList()
         self.speed_list = arcade.SpriteList()
@@ -92,14 +95,14 @@ class SpaceGameWindow(arcade.Window):
 
         if self.framecount%35==0 and self.lv3 == True:
             enemyair = EnemyAirforce("images/enemyair.png", SCALE*1.2)
-            enemyair.hp = random.randrange(3)+3
+            enemyair.hp = random.randrange(4)+3
             self.enemyair_sprites_list.append(enemyair)
             self.all_sprites_list.append(enemyair)
 
         #spawning enemy level 4 : Elite Tank
         if self.score>=300:
             self.lv4 = True
-            if self.framecount%60==0:
+            if self.framecount%40==0:
                 for enemyred in self.enemyred_sprites_list:#spawning bullet from elite tank
                     redbullet = Redbullet("images/bulletenemy.png", SCALE*0.9)
                     redbullet.center_x = enemyred.center_x
@@ -109,9 +112,26 @@ class SpaceGameWindow(arcade.Window):
 
         if self.framecount%150==0 and self.lv4 == True:
             enemyred = EnemyRed("images/enemyred.png", SCALE)
-            enemyred.hp = 10
+            enemyred.hp = 8
             self.enemyred_sprites_list.append(enemyred)
             self.all_sprites_list.append(enemyred)
+
+        #automatic shooting
+        if self.automatic == True:
+            if self.framecount%8==0:
+                if self.multigun == True:#upgrade
+                    for i in range(3):
+                        bullet = Bullet("images/bullet.png",SCALE*0.8)
+                        bullet.center_x = self.player_sprite.center_x-(self.player_sprite.width/2*(i-1))
+                        bullet.bottom = self.player_sprite.top
+                        self.bullet_sprites_list.append(bullet)
+                        self.all_sprites_list.append(bullet)
+                else :#no upgrade
+                    bullet = Bullet("images/bullet.png",SCALE)
+                    bullet.center_x = self.player_sprite.center_x
+                    bullet.bottom = self.player_sprite.top
+                    self.bullet_sprites_list.append(bullet)
+                    self.all_sprites_list.append(bullet)
         
         #spawning fence
         if self.framecount%75==0:
@@ -134,6 +154,13 @@ class SpaceGameWindow(arcade.Window):
             gun = Greenfoot("images/d.png", SCALE)
             self.gun_list.append(gun)
             self.all_sprites_list.append(gun)
+
+        #automatic upgrade deployed
+        if self.score>=60 and self.autodropped == False:
+            self.autodropped = True
+            gunauto = Greenfoot("images/d2.png",SCALE)
+            self.gun_auto_list.append(gunauto)
+            self.all_sprites_list.append(gunauto)
             
         #collision checking (bullet vs enemies)
         for bullet in self.bullet_sprites_list:
@@ -222,6 +249,13 @@ class SpaceGameWindow(arcade.Window):
                     self.hp-=1
                     redbullet.kill()
                     print("Hitted by a bullet! Hp-1")
+        if self.autodropped == True:
+            hit9 = arcade.check_for_collision_with_list(self.player_sprite,self.gun_auto_list)#player vs autogun
+            if len(hit9)!=0:
+                for gunauto in hit9:
+                    gunauto.kill()
+                    self.automatic = True
+                    print("Autogun activated.")
 
         #gameover status
         if self.hp <= 0:
@@ -233,7 +267,7 @@ class SpaceGameWindow(arcade.Window):
             
     def on_key_press(self, symbol, modifiers):
         #pew pew
-        if symbol == arcade.key.SPACE and self.gameover != True:
+        if symbol == arcade.key.SPACE and self.automatic == False:
             if self.multigun == True:#upgrade
                 for i in range(3):
                     bullet = Bullet("images/bullet.png",SCALE*0.8)

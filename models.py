@@ -16,8 +16,8 @@ class EnemyRed(arcade.Sprite):
             self.dirx = -1
 
     def update(self):
-        self.center_y-=2
-        self.center_x+=self.dirx*4
+        self.center_y-=1
+        self.center_x+=self.dirx*3
         if self.center_x >SCREEN_WIDTH-50 or self.center_x <50 or random.randrange(100)<1:
             self.dirx*=-1
 
