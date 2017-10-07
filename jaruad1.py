@@ -17,7 +17,7 @@ class SpaceGameWindow(arcade.Window):
         #scoring/starting hp/upgrades
         self.score = 0
         self.score_text = None
-        self.hp = 175
+        self.hp = 150
         self.hp_text = None
         self.gameover = False
         self.speedup = 0
@@ -315,14 +315,19 @@ class SpaceGameWindow(arcade.Window):
                 for nuclear in hit11:
                     self.hp-=3
                     nuclear.kill()
-                    print("Hitted by a nuclear! Hp-3")
-                        
+                    print("Hitted by a nuclear! Hp-3")                
 
         #gameover status
         if self.hp <= 0:
             self.gameover = True
         if self.gameover == True:
             print("Game Over!")
+            if self.BOSS == True and self.bossspawned == True:
+                print("So close, yet so far.")
+            elif self.BOSS == False and self.bossspawned == False:
+                print("Not even close, baby!")
+            elif self.BOSS == False and self.bossspawned == True:
+                print("Democracy served! :D")
             print("Final score = ",self.score)
             sys.exit()
             
