@@ -4,6 +4,7 @@
 -hp = invulnerable
 -speed = 7
 -collision damage = instant kill.
+-weapon = -
 
 1.Vanilla tank (score = 0)
 -LV = 1

@@ -11,14 +11,9 @@ class SpaceGameWindow(arcade.Window):
     def __init__(self, width, height):
         super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT)
 
-        #whatever setting
+        #bg setting,framecount
         arcade.set_background_color(arcade.color.AMAZON)
-        self.framecount = 0 #enemy
-        self.framecount2 = 0 #enemysubmarine
-        self.framecount3 = 0 #fence
-        self.framecount4 = 0 #enemyair
-        self.framecount5 = 0 #enemyred
-        self.framecount6 = 0 #enemyredbullet
+        self.framecount = 0
         #scoring/starting hp/upgrades
         self.score = 0
         self.score_text = None
@@ -68,19 +63,16 @@ class SpaceGameWindow(arcade.Window):
     def update(self,x):
         self.all_sprites_list.update()
         self.framecount+=1
-        self.framecount3+=1
 
         #spawning enemy : Vanilla Tank
-        if self.framecount>15:
-            self.framecount = 0
+        if self.framecount%13==0:
             enemy = Enemy("images/enemy.png", SCALE)
             self.enemy_sprites_list.append(enemy)
             self.all_sprites_list.append(enemy)
 
-        #spawning enemy level 2 :Submarine(score>50)
+        #spawning enemy level 2 :Submarine
         if self.score>=30:
             self.lv2 = True
-            self.framecount2+=1
             for enemysub in self.enemysub_sprites_list:#spawning torpedo from submarine
                 if random.randrange(100)<2:
                     torpedo = Torpedo("images/torpedo.png", SCALE)
@@ -89,31 +81,25 @@ class SpaceGameWindow(arcade.Window):
                     self.torpedo_sprites_list.append(torpedo)
                     self.all_sprites_list.append(torpedo)
                 
-        if self.framecount2>30 and self.lv2 == True:
-            self.framecount2 = 0
+        if self.framecount%30==0 and self.lv2 == True:
             enemysub = EnemySubmarine("images/enemysub.png", SCALE)
             self.enemysub_sprites_list.append(enemysub)
             self.all_sprites_list.append(enemysub)
 
-        #spawning enemy level 3 : Airforce(score>300)
+        #spawning enemy level 3 : Kamikaze
         if self.score>=100:
             self.lv3 = True
-            self.framecount4+=1
 
-        if self.framecount4>35 and self.lv3 == True:
-            self.framecount4 = 0
+        if self.framecount%35==0 and self.lv3 == True:
             enemyair = EnemyAirforce("images/enemyair.png", SCALE*1.2)
             enemyair.hp = random.randrange(3)+3
             self.enemyair_sprites_list.append(enemyair)
             self.all_sprites_list.append(enemyair)
 
-        #spawning enemy level 4 : Armed Tank
+        #spawning enemy level 4 : Elite Tank
         if self.score>=300:
             self.lv4 = True
-            self.framecount5+=1
-            self.framecount6+=1
-            if self.framecount6 > 60:
-                self.framecount6 = 0
+            if self.framecount%60==0:
                 for enemyred in self.enemyred_sprites_list:#spawning bullet from elite tank
                     redbullet = Redbullet("images/bulletenemy.png", SCALE*0.9)
                     redbullet.center_x = enemyred.center_x
@@ -121,16 +107,14 @@ class SpaceGameWindow(arcade.Window):
                     self.enemyred_bullet_sprites_list.append(redbullet)
                     self.all_sprites_list.append(redbullet)
 
-        if self.framecount5>150 and self.lv4 == True:
-            self.framecount5 = 0
+        if self.framecount%150==0 and self.lv4 == True:
             enemyred = EnemyRed("images/enemyred.png", SCALE)
             enemyred.hp = 10
             self.enemyred_sprites_list.append(enemyred)
             self.all_sprites_list.append(enemyred)
         
         #spawning fence
-        if self.framecount3>75:
-            self.framecount3 = 0
+        if self.framecount%75==0:
             fence = Torpedo("images/fence.png", SCALE*1.2)
             fence.center_y = SCREEN_HEIGHT
             fence.center_x = random.randrange(SCREEN_WIDTH)+20
