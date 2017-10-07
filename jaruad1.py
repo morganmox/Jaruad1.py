@@ -1,7 +1,7 @@
 import arcade
 import random
 import sys
-from models import Enemy,Bullet,Ship,EnemySubmarine,Torpedo,Greenfoot,EnemyAirforce
+from models import Enemy,Bullet,Ship,EnemySubmarine,Torpedo,Greenfoot,EnemyAirforce,EnemyRed,Redbullet
 
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 800
@@ -17,6 +17,8 @@ class SpaceGameWindow(arcade.Window):
         self.framecount2 = 0 #enemysubmarine
         self.framecount3 = 0 #fence
         self.framecount4 = 0 #enemyair
+        self.framecount5 = 0 #enemyred
+        self.framecount6 = 0 #enemyredbullet
         #scoring/starting hp/upgrades
         self.score = 0
         self.score_text = None
@@ -30,12 +32,15 @@ class SpaceGameWindow(arcade.Window):
         #Level
         self.lv2 = False
         self.lv3 = False
+        self.lv4 = False
         #create all sprite array
         self.all_sprites_list = arcade.SpriteList()
         self.enemy_sprites_list = arcade.SpriteList()
         self.enemysub_sprites_list = arcade.SpriteList()
         self.torpedo_sprites_list = arcade.SpriteList()
         self.enemyair_sprites_list = arcade.SpriteList()
+        self.enemyred_sprites_list = arcade.SpriteList()
+        self.enemyred_bullet_sprites_list = arcade.SpriteList()
         self.bullet_sprites_list = arcade.SpriteList()
         self.gun_list = arcade.SpriteList()
         self.speed_list = arcade.SpriteList()
@@ -65,15 +70,15 @@ class SpaceGameWindow(arcade.Window):
         self.framecount+=1
         self.framecount3+=1
 
-        #spawning enemy : Tank
-        if self.framecount>8:
+        #spawning enemy : Vanilla Tank
+        if self.framecount>15:
             self.framecount = 0
             enemy = Enemy("images/enemy.png", SCALE)
             self.enemy_sprites_list.append(enemy)
             self.all_sprites_list.append(enemy)
 
         #spawning enemy level 2 :Submarine(score>50)
-        if self.score>=50:
+        if self.score>=30:
             self.lv2 = True
             self.framecount2+=1
             for enemysub in self.enemysub_sprites_list:#spawning torpedo from submarine
@@ -91,35 +96,56 @@ class SpaceGameWindow(arcade.Window):
             self.all_sprites_list.append(enemysub)
 
         #spawning enemy level 3 : Airforce(score>300)
-        if self.score>=300:
+        if self.score>=100:
             self.lv3 = True
             self.framecount4+=1
 
         if self.framecount4>35 and self.lv3 == True:
             self.framecount4 = 0
             enemyair = EnemyAirforce("images/enemyair.png", SCALE*1.2)
-            enemyair.hp = random.randrange(4)+4
+            enemyair.hp = random.randrange(3)+3
             self.enemyair_sprites_list.append(enemyair)
             self.all_sprites_list.append(enemyair)
+
+        #spawning enemy level 4 : Armed Tank
+        if self.score>=300:
+            self.lv4 = True
+            self.framecount5+=1
+            self.framecount6+=1
+            if self.framecount6 > 60:
+                self.framecount6 = 0
+                for enemyred in self.enemyred_sprites_list:#spawning bullet from elite tank
+                    redbullet = Redbullet("images/bulletenemy.png", SCALE*0.9)
+                    redbullet.center_x = enemyred.center_x
+                    redbullet.top = enemyred.bottom
+                    self.enemyred_bullet_sprites_list.append(redbullet)
+                    self.all_sprites_list.append(redbullet)
+
+        if self.framecount5>150 and self.lv4 == True:
+            self.framecount5 = 0
+            enemyred = EnemyRed("images/enemyred.png", SCALE)
+            enemyred.hp = 10
+            self.enemyred_sprites_list.append(enemyred)
+            self.all_sprites_list.append(enemyred)
         
         #spawning fence
         if self.framecount3>75:
             self.framecount3 = 0
-            fence = Torpedo("images/fence.png", SCALE*1.1)
+            fence = Torpedo("images/fence.png", SCALE*1.2)
             fence.center_y = SCREEN_HEIGHT
-            fence.center_x = random.randrange(SCREEN_WIDTH)+50
+            fence.center_x = random.randrange(SCREEN_WIDTH)+20
             self.fence_list.append(fence)
             self.all_sprites_list.append(fence)
 
-        #speedup upgrade deployed (score>25)
-        if self.score>= 25 and self.speeddropped == False:
+        #speedup upgrade deployed
+        if self.score>= 20 and self.speeddropped == False:
             self.speeddropped = True
             speeder = Greenfoot("images/greenfoot.png", SCALE)
             self.speed_list.append(speeder)
             self.all_sprites_list.append(speeder)
  
-        #multigun upgrade deployed (score>60)
-        if self.score>= 60 and self.gundropped == False:
+        #multigun upgrade deployed
+        if self.score>= 40 and self.gundropped == False:
             self.gundropped = True
             gun = Greenfoot("images/d.png", SCALE)
             self.gun_list.append(gun)
@@ -149,7 +175,16 @@ class SpaceGameWindow(arcade.Window):
                 if enemyair.hp<=0:
                     enemyair.kill()
                     self.score+=3
-                    print("Killed an airforce. score+3")
+                    print("Killed a kamikaze. score+3")
+            hit4 = arcade.check_for_collision_with_list(bullet,self.enemyred_sprites_list)
+            if len(hit4)!=0:
+                bullet.kill()
+            for enemyred in hit4:
+                enemyred.hp-=1
+                if enemyred.hp<=0:
+                    enemyred.kill()
+                    self.score+=5
+                    print("Killed an elite tank. score+5")
 
         #collision checking (enemies/upgrade vs player)       
         hit = arcade.check_for_collision_with_list(self.player_sprite,self.enemy_sprites_list)#player vs tank
@@ -157,13 +192,14 @@ class SpaceGameWindow(arcade.Window):
             for enemy in hit:
                 enemy.kill()
             print("Hitted by a vanilla tank! Hp-1")
-            self.hp-=1            
-        hit2 = arcade.check_for_collision_with_list(self.player_sprite,self.torpedo_sprites_list)#player vs torpedo
-        if len(hit2)!=0:
-            for torpedo in hit2:
-                torpedo.kill()
-            print("Hitted by a torpedo! Hp-1")
-            self.hp-=1   
+            self.hp-=1
+        if self.lv2 == True:  
+            hit2 = arcade.check_for_collision_with_list(self.player_sprite,self.torpedo_sprites_list)#player vs torpedo
+            if len(hit2)!=0:
+                for torpedo in hit2:
+                    torpedo.kill()
+                    self.hp-=1 
+                    print("Hitted by a torpedo! Hp-1")
         if self.speeddropped == True:
             hit3 = arcade.check_for_collision_with_list(self.player_sprite,self.speed_list)#player vs speedup
             if len(hit3)!=0:
@@ -178,25 +214,35 @@ class SpaceGameWindow(arcade.Window):
                     gun.kill()
                     self.multigun = True
                     print("Multigun activated.")
-
         hit5 = arcade.check_for_collision_with_list(self.player_sprite,self.fence_list)#player vs fence
         if len(hit5)!=0:
             print("Hitted by a fence! Instakill.")
-            self.hp = 0
-
+            self.gameover = True
         if self.lv3 == True:
             hit6 = arcade.check_for_collision_with_list(self.player_sprite,self.enemyair_sprites_list)#player vs airforce
             if len(hit6)!=0:
                 for enemyair in hit6:
                     self.hp-=enemyair.hp
                     enemyair.kill()
-                    print("Hitted by an airforce! Hp-",enemyair.hp)
+                    print("Hitted by a kamikaze! Hp-",enemyair.hp)
+        if self.lv4 == True:
+            hit7 = arcade.check_for_collision_with_list(self.player_sprite,self.enemyred_sprites_list)#player vs elite tank
+            if len(hit7)!=0:
+                for enemyred in hit7:
+                    self.hp-=2
+                    enemyred.kill()
+                    print("Hitted by an elite tank! Hp-2")
+            hit8 = arcade.check_for_collision_with_list(self.player_sprite,self.enemyred_bullet_sprites_list)#player vs elite tank's bullet
+            if len(hit8)!=0:
+                for redbullet in hit8:
+                    self.hp-=1
+                    redbullet.kill()
+                    print("Hitted by a bullet! Hp-1")
 
         #gameover status
         if self.hp <= 0:
             self.gameover = True
         if self.gameover == True:
-            self.player_sprite.kill()
             print("Game Over")
             print("Final score = ",self.score)
             sys.exit()

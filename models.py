@@ -5,6 +5,33 @@ SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 800
 SCALE = 1.4
 
+class EnemyRed(arcade.Sprite):
+    def __init__(self,filename,scale):
+        super().__init__(filename,scale)
+        self.center_y = SCREEN_HEIGHT
+        self.center_x = SCREEN_WIDTH/2
+        if random.randrange(2) == 0:
+            self.dirx = 1
+        else:
+            self.dirx = -1
+
+    def update(self):
+        self.center_y-=2
+        self.center_x+=self.dirx*4
+        if self.center_x >SCREEN_WIDTH-50 or self.center_x <50 or random.randrange(100)<1:
+            self.dirx*=-1
+
+class Redbullet(arcade.Sprite):
+    def __init__(self,filename,scale):
+        super().__init__(filename,scale)
+        self.vy = 2
+
+    def update(self):
+        self.vy+=1
+        self.center_y-=self.vy
+        if self.center_y<0:
+            self.kill()
+
 class EnemyAirforce(arcade.Sprite):
     def __init__(self,filename,scale):
         super().__init__(filename,scale)

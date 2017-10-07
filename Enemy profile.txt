@@ -1,25 +1,40 @@
 0.Fence
+-LV = -
 -score required = 0
 -hp = invulnerable
 -speed = 7
 -collision damage = instant kill.
 
-1.Vanilla tank
--score required = 0
+1.Vanilla tank (score = 0)
+-LV = 1
 -hp = 1
 -speed = 5-9
+-score worth = 1
 -collision damage = 1
+-weapon = -
 
-2.Submarine
--score required = 50
+2.Submarine (score = 30)
+-LV = 2
 -hp = 1
 -speed = ???
--collision damage = 0
-*Randomly release a 1 damage Torpedo (invulnerable,speed = 7).
+-score worth = 2
+-collision damage = none
+-weapon = Torpedo (speed = 7,damage = 1)
 
-3.Airforce
--score required = 300
--hp = 4-7
+
+3.Airforce (score = 100)
+-LV = 3
+-hp = 3-5
 -speed = x:7 , y:9
+-score worth = 3
 -collision damage = remaining hp.
+-weapon = -
+
+4.Elite tank (score = 300)
+-LV = 4
+-hp = 10
+-speed =  x:4 , y:2
+-score worth = 5
+-collision damage = 2
+-weapon = Bullet (speed = 2++,damage = 1)
 
