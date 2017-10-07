@@ -19,6 +19,8 @@ class SpaceGameWindow(arcade.Window):
         self.score_text = None
         self.hp = 150
         self.hp_text = None
+        self.boss_hp = 100
+        self.boss_hp_text = None
         self.gameover = False
         self.speedup = 0
         self.speeddropped = False
@@ -62,10 +64,16 @@ class SpaceGameWindow(arcade.Window):
             self.score_text = arcade.create_text(output, arcade.color.WHITE, 20)
         arcade.render_text(self.score_text, SCREEN_WIDTH/2-50, SCREEN_HEIGHT-60)
         #hp
-        output2 = f"HP = {self.hp}"
+        output2 = f"Player : {self.hp}"
         if not self.hp_text or output2 != self.hp_text.text:
-            self.hp_text = arcade.create_text(output2, arcade.color.BLACK, 18)
+            self.hp_text = arcade.create_text(output2, arcade.color.BLACK, 20)
         arcade.render_text(self.hp_text, SCREEN_WIDTH/25, SCREEN_HEIGHT/25)
+        #bosshp
+        if self.BOSS == True:
+            output3 = f"Prayeth Jandara : {self.boss_hp}"
+            if not self.boss_hp_text or output3 != self.boss_hp_text.text:
+                self.boss_hp_text = arcade.create_text(output3, arcade.color.RED, 20)
+            arcade.render_text(self.boss_hp_text, SCREEN_WIDTH*17/25, SCREEN_HEIGHT/25)
 
     def update(self,x):
         self.all_sprites_list.update()
@@ -232,6 +240,7 @@ class SpaceGameWindow(arcade.Window):
                     bullet.kill()
                 for prayeth in hit5:
                     prayeth.hp-=1
+                    self.boss_hp-=1
                     if prayeth.hp<=0:
                         prayeth.kill()
                         self.score+=44
