@@ -5,6 +5,21 @@ SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 800
 SCALE = 1.4
 
+class BOSS(arcade.Sprite):
+    def __init__(self,filename,scale):
+        super().__init__(filename,scale)
+        self.center_x = SCREEN_WIDTH/2
+        self.center_y = SCREEN_HEIGHT
+        self.vx = 3
+
+    def update(self):
+        if self.center_y > SCREEN_HEIGHT-140:
+            self.center_y-=1
+        else:
+            self.center_x +=self.vx
+            if self.center_x >SCREEN_WIDTH-80 or self.center_x <80 or random.randrange(100)<1:
+                self.vx*=-1     
+
 class EnemyRed(arcade.Sprite):
     def __init__(self,filename,scale):
         super().__init__(filename,scale)

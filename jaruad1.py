@@ -1,7 +1,7 @@
 import arcade
 import random
 import sys
-from models import Enemy,Bullet,Ship,EnemySubmarine,Torpedo,Greenfoot,EnemyAirforce,EnemyRed,Redbullet
+from models import Enemy,Bullet,Ship,EnemySubmarine,Torpedo,Greenfoot,EnemyAirforce,EnemyRed,Redbullet,BOSS
 
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 800
@@ -17,7 +17,7 @@ class SpaceGameWindow(arcade.Window):
         #scoring/starting hp/upgrades
         self.score = 0
         self.score_text = None
-        self.hp = 30
+        self.hp = 175
         self.hp_text = None
         self.gameover = False
         self.speedup = 0
@@ -26,10 +26,12 @@ class SpaceGameWindow(arcade.Window):
         self.gundropped = False
         self.automatic = False
         self.autodropped = False
+        self.bossspawned = False
         #Level
         self.lv2 = False
         self.lv3 = False
         self.lv4 = False
+        self.BOSS = False
         #create all sprite array
         self.all_sprites_list = arcade.SpriteList()
         self.enemy_sprites_list = arcade.SpriteList()
@@ -38,6 +40,8 @@ class SpaceGameWindow(arcade.Window):
         self.enemyair_sprites_list = arcade.SpriteList()
         self.enemyred_sprites_list = arcade.SpriteList()
         self.enemyred_bullet_sprites_list = arcade.SpriteList()
+        self.boss_sprite = arcade.SpriteList()
+        self.nuclear_sprites_list = arcade.SpriteList()
         self.gun_auto_list = arcade.SpriteList()
         self.bullet_sprites_list = arcade.SpriteList()
         self.gun_list = arcade.SpriteList()
@@ -116,6 +120,32 @@ class SpaceGameWindow(arcade.Window):
             self.enemyred_sprites_list.append(enemyred)
             self.all_sprites_list.append(enemyred)
 
+        #spawning enemy BOSS : General Prayeth
+        if self.score>=500 and self.bossspawned == False:
+            self.BOSS = True
+            self.bossspawned = True
+            print("BOSS incoming! General Prayeth (hp:100,weapon:nuclear,subweapon:pistol)")
+            prayeth = BOSS("images/prayed.png", SCALE)
+            prayeth.hp = 100
+            self.boss_sprite.append(prayeth)
+            self.all_sprites_list.append(prayeth)
+
+        if self.BOSS == True:
+            if self.framecount%40==0:#Prayeth's weapon no.1
+                nuclear = Redbullet("images/nuclear.png",SCALE)
+                nuclear.center_x = random.randrange(SCREEN_WIDTH-40)+40
+                nuclear.center_y = SCREEN_HEIGHT
+                nuclear.hp = 6
+                self.nuclear_sprites_list.append(nuclear)
+                self.all_sprites_list.append(nuclear)
+            if self.framecount%25==0:#Prayeth's weapon no.2
+                for prayeth in self.boss_sprite:#spawning bullet from prayeth
+                    redbullet = Redbullet("images/bulletenemy.png", SCALE*0.9)
+                    redbullet.center_x = prayeth.center_x
+                    redbullet.top = prayeth.bottom
+                    self.enemyred_bullet_sprites_list.append(redbullet)
+                    self.all_sprites_list.append(redbullet)
+
         #automatic shooting
         if self.automatic == True:
             if self.framecount%8==0:
@@ -135,7 +165,7 @@ class SpaceGameWindow(arcade.Window):
         
         #spawning fence
         if self.framecount%75==0:
-            fence = Torpedo("images/fence.png", SCALE*1.2)
+            fence = Torpedo("images/fence.png", SCALE*1.1)
             fence.center_y = SCREEN_HEIGHT
             fence.center_x = random.randrange(SCREEN_WIDTH)+20
             self.fence_list.append(fence)
@@ -196,6 +226,25 @@ class SpaceGameWindow(arcade.Window):
                     enemyred.kill()
                     self.score+=5
                     print("Killed an elite tank. score+5")
+            if self.BOSS == True:
+                hit5 = arcade.check_for_collision_with_list(bullet,self.boss_sprite)
+                if len(hit5)!=0:
+                    bullet.kill()
+                for prayeth in hit5:
+                    prayeth.hp-=1
+                    if prayeth.hp<=0:
+                        prayeth.kill()
+                        self.score+=44
+                        self.BOSS = False
+                        print("Killed general Prayeth! score+44")
+                        print("Game complete! Entering endless mode.")
+                hit6 = arcade.check_for_collision_with_list(bullet,self.nuclear_sprites_list)
+                if len(hit6)!=0:
+                    bullet.kill()
+                for nuclear in hit6:
+                    nuclear.hp-=1
+                    if nuclear.hp<=0:
+                        nuclear.kill()
 
         #collision checking (enemies/upgrade vs player)       
         hit = arcade.check_for_collision_with_list(self.player_sprite,self.enemy_sprites_list)#player vs tank
@@ -256,12 +305,24 @@ class SpaceGameWindow(arcade.Window):
                     gunauto.kill()
                     self.automatic = True
                     print("Autogun activated.")
+        if self.BOSS == True:
+            hit10 = arcade.check_for_collision_with_list(self.player_sprite,self.boss_sprite)#player vs boss
+            if len(hit10)!=0:
+                print("Coup by Prayeth! Instakill.")
+                self.gameover = True
+            hit11 = arcade.check_for_collision_with_list(self.player_sprite,self.nuclear_sprites_list)
+            if len(hit11)!=0:
+                for nuclear in hit11:
+                    self.hp-=3
+                    nuclear.kill()
+                    print("Hitted by a nuclear! Hp-3")
+                        
 
         #gameover status
         if self.hp <= 0:
             self.gameover = True
         if self.gameover == True:
-            print("Game Over")
+            print("Game Over!")
             print("Final score = ",self.score)
             sys.exit()
             

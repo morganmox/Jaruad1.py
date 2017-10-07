@@ -23,7 +23,7 @@
 -weapon = Torpedo (speed = 7,damage = 1)
 
 
-3.Airforce (score = 100)
+3.Kamikaze (score = 100)
 -LV = 3
 -hp = 3-6
 -speed = x:7 , y:9
@@ -39,3 +39,10 @@
 -collision damage = 2
 -weapon = Bullet (speed = 2++,damage = 1)
 
+5.BOSS : Ganeral Prayeth (score = 500)
+-LV = 5
+-hp = 100
+-speed = 3
+-score worth = 44
+-collision damage = instant kill.
+-weapon = 1.Bullet (speed = 2++,damage = 1) 2.Nuclear (speed = 2++,hp = 6,damage = 3)
