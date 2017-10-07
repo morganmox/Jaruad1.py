@@ -1,0 +1,25 @@
+0.Fence
+-score required = 0
+-hp = invulnerable
+-speed = 7
+-collision damage = instant kill.
+
+1.Vanilla tank
+-score required = 0
+-hp = 1
+-speed = 5-9
+-collision damage = 1
+
+2.Submarine
+-score required = 50
+-hp = 1
+-speed = ???
+-collision damage = 0
+*Randomly release a 1 damage Torpedo (invulnerable,speed = 7).
+
+3.Airforce
+-score required = 300
+-hp = 4-7
+-speed = x:7 , y:9
+-collision damage = remaining hp.
+
