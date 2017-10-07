@@ -1,7 +1,7 @@
 import arcade
 import random
 import sys
-from models import Enemy,Bullet,Ship,EnemySubmarine,Torpedo,Greenfoot
+from models import Enemy,Bullet,Ship,EnemySubmarine,Torpedo,Greenfoot,EnemyAirforce
 
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 800
@@ -13,14 +13,14 @@ class SpaceGameWindow(arcade.Window):
 
         #whatever setting
         arcade.set_background_color(arcade.color.AMAZON)
-        self.set_mouse_visible(False) #hide cursor
         self.framecount = 0 #enemy
         self.framecount2 = 0 #enemysubmarine
         self.framecount3 = 0 #fence
-        #scoring/hpremaining/upgrades
+        self.framecount4 = 0 #enemyair
+        #scoring/starting hp/upgrades
         self.score = 0
         self.score_text = None
-        self.hp = 5
+        self.hp = 8
         self.hp_text = None
         self.gameover = False
         self.speedup = 0
@@ -35,6 +35,7 @@ class SpaceGameWindow(arcade.Window):
         self.enemy_sprites_list = arcade.SpriteList()
         self.enemysub_sprites_list = arcade.SpriteList()
         self.torpedo_sprites_list = arcade.SpriteList()
+        self.enemyair_sprites_list = arcade.SpriteList()
         self.bullet_sprites_list = arcade.SpriteList()
         self.gun_list = arcade.SpriteList()
         self.speed_list = arcade.SpriteList()
@@ -42,6 +43,7 @@ class SpaceGameWindow(arcade.Window):
         #giving birth to player
         self.player_sprite = Ship("images/ship.png", SCALE*0.95)
         self.all_sprites_list.append(self.player_sprite)
+        print("Game start with Hp =",self.hp)
 
     def on_draw(self):
         #simply draw everything
@@ -64,7 +66,7 @@ class SpaceGameWindow(arcade.Window):
         self.framecount3+=1
 
         #spawning enemy
-        if self.framecount>7 and self.gameover!=True:
+        if self.framecount>8:
             self.framecount = 0
             enemy = Enemy("images/enemy.png", SCALE)
             self.enemy_sprites_list.append(enemy)
@@ -74,26 +76,38 @@ class SpaceGameWindow(arcade.Window):
         if self.score>=50:
             self.lv2 = True
             self.framecount2+=1
-            for enemysub in self.enemysub_sprites_list:
-                if random.randrange(100)<1:
+            for enemysub in self.enemysub_sprites_list:#spawning torpedo from submarine
+                if random.randrange(100)<2:
                     torpedo = Torpedo("images/torpedo.png", SCALE)
                     torpedo.center_x = enemysub.center_x
                     torpedo.top = enemysub.bottom
                     self.torpedo_sprites_list.append(torpedo)
                     self.all_sprites_list.append(torpedo)
                 
-        if self.framecount2>25 and self.gameover!=True and self.lv2 == True:
+        if self.framecount2>30 and self.lv2 == True:
             self.framecount2 = 0
             enemysub = EnemySubmarine("images/enemysub.png", SCALE)
             self.enemysub_sprites_list.append(enemysub)
             self.all_sprites_list.append(enemysub)
 
+        #spawning enemy level 3 (score>300)
+        if self.score>=300:
+            self.lv3 = True
+            self.framecount4+=1
+
+        if self.framecount4>40 and self.lv3 == True:
+            self.framecount4 = 0
+            enemyair = EnemyAirforce("images/enemyair.png", SCALE*1.2)
+            enemyair.hp = 5
+            self.enemyair_sprites_list.append(enemyair)
+            self.all_sprites_list.append(enemyair)
+        
         #spawning fence
-        if self.framecount3>80 and self.gameover!=True:
+        if self.framecount3>80:
             self.framecount3 = 0
-            fence = Torpedo("images/fence.png", SCALE)
+            fence = Torpedo("images/fence.png", SCALE*1.1)
             fence.center_y = SCREEN_HEIGHT
-            fence.center_x = random.randrange(SCREEN_WIDTH)
+            fence.center_x = random.randrange(SCREEN_WIDTH)+50
             self.fence_list.append(fence)
             self.all_sprites_list.append(fence)
 
@@ -119,45 +133,67 @@ class SpaceGameWindow(arcade.Window):
             for enemy in hit:
                 enemy.kill()
                 self.score+=1
+                print("Killed a vanilla tank. score+1")
             hit2 = arcade.check_for_collision_with_list(bullet,self.enemysub_sprites_list)
             if len(hit2)!=0:
                 bullet.kill()
             for enemysub in hit2:
                 enemysub.kill()
                 self.score+=2
+                print("Killed a submarine. score+2")
+            hit3 = arcade.check_for_collision_with_list(bullet,self.enemyair_sprites_list)
+            if len(hit3)!=0:
+                bullet.kill()
+            for enemyair in hit3:
+                enemyair.hp-=1
+                if enemyair.hp<=0:
+                    enemyair.kill()
+                    self.score+=3
+                    print("Killed an airforce. score+3")
 
         #collision checking (enemies/upgrade vs player)       
         hit = arcade.check_for_collision_with_list(self.player_sprite,self.enemy_sprites_list)#player vs tank
         if len(hit)!=0:
             for enemy in hit:
                 enemy.kill()
-            self.hp-=1
+            print("Hitted by a vanilla tank! Hp-1")
+            self.hp-=1            
         hit2 = arcade.check_for_collision_with_list(self.player_sprite,self.torpedo_sprites_list)#player vs torpedo
         if len(hit2)!=0:
             for torpedo in hit2:
                 torpedo.kill()
-            self.hp-=1
+            print("Hitted by a torpedo! Hp-1")
+            self.hp-=1   
         if self.speeddropped == True:
             hit3 = arcade.check_for_collision_with_list(self.player_sprite,self.speed_list)#player vs speedup
             if len(hit3)!=0:
                 for speeder in hit3:
                     speeder.kill()
                     self.speedup += 1
-                    print("Speedup activate")
+                    print("Speedup activated.")
         if self.gundropped == True:
             hit4 = arcade.check_for_collision_with_list(self.player_sprite,self.gun_list)#player vs multigun
             if len(hit4)!=0:
                 for gun in hit4:
                     gun.kill()
                     self.multigun = True
-                    print("Multigun activate")
+                    print("Multigun activated.")
 
         hit5 = arcade.check_for_collision_with_list(self.player_sprite,self.fence_list)#player vs fence
         if len(hit5)!=0:
+            print("Hitted by a fence! Instakill.")
             self.hp = 0
 
+        if self.lv3 == True:
+            hit6 = arcade.check_for_collision_with_list(self.player_sprite,self.enemyair_sprites_list)#player vs airforce
+            if len(hit6)!=0:
+                for enemyair in hit6:
+                    self.hp-=enemyair.hp
+                    enemyair.kill()
+                    print("Hitted by an airforce! Hp-",enemyair.hp)
+
         #gameover status
-        if self.hp == 0:
+        if self.hp <= 0:
             self.gameover = True
         if self.gameover == True:
             self.player_sprite.kill()
@@ -170,13 +206,13 @@ class SpaceGameWindow(arcade.Window):
         if symbol == arcade.key.SPACE and self.gameover != True:
             if self.multigun == True:#upgrade
                 for i in range(3):
-                    bullet = Bullet("images/bullet.png",SCALE*0.9)
+                    bullet = Bullet("images/bullet.png",SCALE*0.8)
                     bullet.center_x = self.player_sprite.center_x-(self.player_sprite.width/2*(i-1))
                     bullet.bottom = self.player_sprite.top
                     self.bullet_sprites_list.append(bullet)
                     self.all_sprites_list.append(bullet)
             else :#no upgrade
-                bullet = Bullet("images/bullet.png",SCALE*0.9)
+                bullet = Bullet("images/bullet.png",SCALE)
                 bullet.center_x = self.player_sprite.center_x
                 bullet.bottom = self.player_sprite.top
                 self.bullet_sprites_list.append(bullet)

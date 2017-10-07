@@ -5,6 +5,19 @@ SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 800
 SCALE = 1.4
 
+class EnemyAirforce(arcade.Sprite):
+    def __init__(self,filename,scale):
+        super().__init__(filename,scale)
+        self.center_y = SCREEN_HEIGHT-random.randrange(SCREEN_HEIGHT/8)
+        self.center_x = 0
+        self.v = 7
+
+    def update(self):
+        self.center_y -= self.v+1
+        self.center_x += self.v
+        if self.center_x>SCREEN_WIDTH or self.center_y<0:
+            self.kill()
+   
 class EnemySubmarine(arcade.Sprite):
     def __init__(self,filename,scale):
         super().__init__(filename,scale)
@@ -67,7 +80,7 @@ class Ship(arcade.Sprite):
         if self.center_y<0:
             self.center_y = 25
 
-class Greenfoot(arcade.Sprite):
+class Greenfoot(arcade.Sprite):#upgrades
     def __init__(self,filename,scale):
         super().__init__(filename,scale)
         self.center_x = random.randrange(SCREEN_WIDTH)
