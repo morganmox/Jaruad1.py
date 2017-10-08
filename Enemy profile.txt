@@ -24,8 +24,8 @@
 
 3.Kamikaze (score = 100)
 -LV = 3
--hp = 4-7
--speed = x:7 , y:9
+-hp = 3-7
+-speed = 0++
 -score worth = 3
 -collision damage = remaining hp.
 -weapon = -

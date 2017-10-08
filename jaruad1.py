@@ -2,7 +2,7 @@ import arcade
 import random
 import sys
 from models import Enemy,Bullet,Ship,EnemySubmarine,Torpedo,Greenfoot,EnemyAirforce,EnemyRed,Redbullet,BOSS,EnemyBlue
-
+#ตรงนี้อย่าซน
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 800
 SCALE = 1.4
@@ -17,7 +17,7 @@ class SpaceGameWindow(arcade.Window):
         #scoring/starting hp/upgrades
         self.score = 0
         self.score_text = None
-        self.hp = 150
+        self.hp = 200
         self.hp_text = None
         self.boss_hp = 100
         self.boss_hp_text = None
@@ -129,9 +129,11 @@ class SpaceGameWindow(arcade.Window):
         if self.score>=100:
             self.lv3 = True
 
-        if self.framecount%35==0 and self.lv3 == True:
-            enemyair = EnemyAirforce("images/enemyair.png", SCALE*1.2)
-            enemyair.hp = random.randrange(4)+4
+        if self.framecount%36==0 and self.lv3 == True:
+            enemyair = EnemyAirforce("images/enemyair.png", SCALE*1.1)
+            if enemyair.center_x> SCREEN_WIDTH/2:
+                enemyair.angle = 180
+            enemyair.hp = random.randrange(5)+3
             self.enemyair_sprites_list.append(enemyair)
             self.all_sprites_list.append(enemyair)
 
@@ -404,7 +406,7 @@ class SpaceGameWindow(arcade.Window):
             elif self.BOSS == False and self.bossspawned == False:
                 print("Not even close, baby!")
             elif self.BOSS == False and self.bossspawned == True:
-                print("Democracy served! :D")
+                print("You win! Thanks for playing. :D")
             print("Final score = ",self.score)
             sys.exit()
             

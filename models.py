@@ -1,6 +1,6 @@
 import arcade
 import random
-#Must match with main program's setting for accurate display
+#ตรงนี้อย่าซน
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 800
 SCALE = 1.4
@@ -73,14 +73,30 @@ class Redbullet(arcade.Sprite):
 class EnemyAirforce(arcade.Sprite):
     def __init__(self,filename,scale):
         super().__init__(filename,scale)
-        self.center_y = SCREEN_HEIGHT-random.randrange(SCREEN_HEIGHT/8)
-        self.center_x = 0
+        if random.randrange(2)==0:
+            self.initleft = True
+        else:
+            self.initleft = False
+        self.center_y = random.randrange(SCREEN_HEIGHT*3/4)+30
+        self.vx = 0
+        if self.initleft == True:
+            self.center_x = 0
+        else:
+            self.center_x = SCREEN_WIDTH
 
     def update(self):
-        self.center_y -= 9
-        self.center_x += 7
-        if self.center_x>SCREEN_WIDTH or self.center_y<0:
-            self.kill()
+        if random.randrange(5)==0:
+            if self.initleft == True:
+                self.vx+=1
+            else:
+                self.vx-=1
+        self.center_x += self.vx
+        if self.initleft == True:
+            if self.center_x > SCREEN_WIDTH:
+                self.kill()
+        else:
+            if self.center_x < 0:
+                self.kill()
    
 class EnemySubmarine(arcade.Sprite):
     def __init__(self,filename,scale):
