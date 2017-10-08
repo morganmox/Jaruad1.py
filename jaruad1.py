@@ -1,7 +1,7 @@
 import arcade
 import random
 import sys
-from models import Enemy,Bullet,Ship,EnemySubmarine,Torpedo,Greenfoot,EnemyAirforce,EnemyRed,Redbullet,BOSS
+from models import Enemy,Bullet,Ship,EnemySubmarine,Torpedo,Greenfoot,EnemyAirforce,EnemyRed,Redbullet,BOSS,EnemyBlue
 
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 800
@@ -28,7 +28,9 @@ class SpaceGameWindow(arcade.Window):
         self.gundropped = False
         self.automatic = False
         self.autodropped = False
+        self.healdropped = False
         self.bossspawned = False
+        self.bossdefeat = False
         #Level
         self.lv2 = False
         self.lv3 = False
@@ -44,7 +46,9 @@ class SpaceGameWindow(arcade.Window):
         self.enemyred_bullet_sprites_list = arcade.SpriteList()
         self.boss_sprite = arcade.SpriteList()
         self.nuclear_sprites_list = arcade.SpriteList()
+        self.enemyblue_sprites_list = arcade.SpriteList()
         self.gun_auto_list = arcade.SpriteList()
+        self.heal_list = arcade.SpriteList()
         self.bullet_sprites_list = arcade.SpriteList()
         self.gun_list = arcade.SpriteList()
         self.speed_list = arcade.SpriteList()
@@ -66,11 +70,11 @@ class SpaceGameWindow(arcade.Window):
         #hp
         output2 = f"Player : {self.hp}"
         if not self.hp_text or output2 != self.hp_text.text:
-            self.hp_text = arcade.create_text(output2, arcade.color.BLACK, 20)
+            self.hp_text = arcade.create_text(output2, arcade.color.WHITE, 20)
         arcade.render_text(self.hp_text, SCREEN_WIDTH/25, SCREEN_HEIGHT/25)
         #bosshp
         if self.BOSS == True:
-            output3 = f"Prayeth Jandara : {self.boss_hp}"
+            output3 = f"General Prayeth : {self.boss_hp}"
             if not self.boss_hp_text or output3 != self.boss_hp_text.text:
                 self.boss_hp_text = arcade.create_text(output3, arcade.color.RED, 20)
             arcade.render_text(self.boss_hp_text, SCREEN_WIDTH*17/25, SCREEN_HEIGHT/25)
@@ -80,7 +84,7 @@ class SpaceGameWindow(arcade.Window):
         self.framecount+=1
 
         #spawning enemy : Vanilla Tank
-        if self.framecount%13==0:
+        if self.framecount%12==0:
             enemy = Enemy("images/enemy.png", SCALE)
             self.enemy_sprites_list.append(enemy)
             self.all_sprites_list.append(enemy)
@@ -107,7 +111,7 @@ class SpaceGameWindow(arcade.Window):
 
         if self.framecount%35==0 and self.lv3 == True:
             enemyair = EnemyAirforce("images/enemyair.png", SCALE*1.2)
-            enemyair.hp = random.randrange(4)+3
+            enemyair.hp = random.randrange(4)+4
             self.enemyair_sprites_list.append(enemyair)
             self.all_sprites_list.append(enemyair)
 
@@ -154,12 +158,21 @@ class SpaceGameWindow(arcade.Window):
                     self.enemyred_bullet_sprites_list.append(redbullet)
                     self.all_sprites_list.append(redbullet)
 
+        #spawning enemy level 6 :  Thorn Tank
+        if self.bossdefeat == True and self.framecount%130==0:
+            enemyblue = EnemyBlue("images/enemyblue.png", SCALE)
+            if enemyblue.center_y < SCREEN_HEIGHT/2:
+                enemyblue.angle = 180
+            enemyblue.hp = 15
+            self.enemyblue_sprites_list.append(enemyblue)
+            self.all_sprites_list.append(enemyblue)
+
         #automatic shooting
         if self.automatic == True:
             if self.framecount%8==0:
                 if self.multigun == True:#upgrade
                     for i in range(3):
-                        bullet = Bullet("images/bullet.png",SCALE*0.8)
+                        bullet = Bullet("images/bullet.png",SCALE*0.9)
                         bullet.center_x = self.player_sprite.center_x-(self.player_sprite.width/2*(i-1))
                         bullet.bottom = self.player_sprite.top
                         self.bullet_sprites_list.append(bullet)
@@ -187,19 +200,26 @@ class SpaceGameWindow(arcade.Window):
             self.all_sprites_list.append(speeder)
  
         #multigun upgrade deployed
-        if self.score>= 40 and self.gundropped == False:
+        if self.score>= 80 and self.gundropped == False:
             self.gundropped = True
             gun = Greenfoot("images/d.png", SCALE)
             self.gun_list.append(gun)
             self.all_sprites_list.append(gun)
 
         #automatic upgrade deployed
-        if self.score>=60 and self.autodropped == False:
+        if self.score>=40 and self.autodropped == False:
             self.autodropped = True
             gunauto = Greenfoot("images/d2.png",SCALE)
             self.gun_auto_list.append(gunauto)
             self.all_sprites_list.append(gunauto)
-            
+
+        #heal deployed after boss defeated
+        if self.bossdefeat == True and self.healdropped == False:
+            self.healdropped = True
+            heal = Greenfoot("images/d3.png",SCALE)
+            self.heal_list.append(heal)
+            self.all_sprites_list.append(heal)
+        
         #collision checking (bullet vs enemies)
         for bullet in self.bullet_sprites_list:
             hit = arcade.check_for_collision_with_list(bullet,self.enemy_sprites_list)
@@ -234,97 +254,125 @@ class SpaceGameWindow(arcade.Window):
                     enemyred.kill()
                     self.score+=5
                     print("Killed an elite tank. score+5")
-            if self.BOSS == True:
-                hit5 = arcade.check_for_collision_with_list(bullet,self.boss_sprite)
-                if len(hit5)!=0:
-                    bullet.kill()
-                for prayeth in hit5:
-                    prayeth.hp-=1
-                    self.boss_hp-=1
-                    if prayeth.hp<=0:
-                        prayeth.kill()
-                        self.score+=44
-                        self.BOSS = False
-                        print("Killed general Prayeth! score+44")
-                        print("Game complete! Entering endless mode.")
-                hit6 = arcade.check_for_collision_with_list(bullet,self.nuclear_sprites_list)
-                if len(hit6)!=0:
-                    bullet.kill()
-                for nuclear in hit6:
-                    nuclear.hp-=1
-                    if nuclear.hp<=0:
-                        nuclear.kill()
+            hit5 = arcade.check_for_collision_with_list(bullet,self.boss_sprite)
+            if len(hit5)!=0:
+                bullet.kill()
+            for prayeth in hit5:
+                prayeth.hp-=1
+                self.boss_hp-=1
+                if prayeth.hp<=0:
+                    prayeth.kill()
+                    self.score+=44
+                    self.BOSS = False
+                    self.bossdefeat = True
+                    print("Killed general Prayeth! score+44")
+                    print("Game complete! Entering endless mode.")
+            hit6 = arcade.check_for_collision_with_list(bullet,self.nuclear_sprites_list)
+            if len(hit6)!=0:
+                bullet.kill()
+            for nuclear in hit6:
+                nuclear.hp-=1
+                if nuclear.hp<=0:
+                    nuclear.kill()
+            hit7 = arcade.check_for_collision_with_list(bullet,self.enemyblue_sprites_list)
+            if len(hit7)!=0:
+                bullet.kill()
+            for enemyblue in hit7:
+                enemyblue.hp-=1
+                self.hp-=1
+                print("Thorn tank reflect your bullet! Hp-1")
+                if enemyblue.hp<=0:
+                    self.score+=20
+                    enemyblue.kill()
+                    print("Killed a thorn tank. score+20")
 
         #collision checking (enemies/upgrade vs player)       
         hit = arcade.check_for_collision_with_list(self.player_sprite,self.enemy_sprites_list)#player vs tank
         if len(hit)!=0:
             for enemy in hit:
                 enemy.kill()
-            print("Hitted by a vanilla tank! Hp-1")
-            self.hp-=1
-        if self.lv2 == True:  
-            hit2 = arcade.check_for_collision_with_list(self.player_sprite,self.torpedo_sprites_list)#player vs torpedo
-            if len(hit2)!=0:
-                for torpedo in hit2:
-                    torpedo.kill()
-                    self.hp-=1 
-                    print("Hitted by a torpedo! Hp-1")
-        if self.speeddropped == True:
-            hit3 = arcade.check_for_collision_with_list(self.player_sprite,self.speed_list)#player vs speedup
-            if len(hit3)!=0:
-                for speeder in hit3:
-                    speeder.kill()
-                    self.speedup += 1
-                    print("Speedup activated.")
-        if self.gundropped == True:
-            hit4 = arcade.check_for_collision_with_list(self.player_sprite,self.gun_list)#player vs multigun
-            if len(hit4)!=0:
-                for gun in hit4:
-                    gun.kill()
-                    self.multigun = True
-                    print("Multigun activated.")
+                self.hp-=1
+                print("Hitted by a vanilla tank! Hp-1")       
+ 
+        hit2 = arcade.check_for_collision_with_list(self.player_sprite,self.torpedo_sprites_list)#player vs torpedo
+        if len(hit2)!=0:
+            for torpedo in hit2:
+                torpedo.kill()
+                self.hp-=1 
+                print("Hitted by a torpedo! Hp-1")
+ 
+        hit3 = arcade.check_for_collision_with_list(self.player_sprite,self.speed_list)#player vs speedup
+        if len(hit3)!=0:
+            for speeder in hit3:
+                speeder.kill()
+                self.speedup += 1
+                print("Speedup activated.")
+
+        hit4 = arcade.check_for_collision_with_list(self.player_sprite,self.gun_list)#player vs multigun
+        if len(hit4)!=0:
+            for gun in hit4:
+                gun.kill()
+                self.multigun = True
+                print("Multigun activated.")
+    
         hit5 = arcade.check_for_collision_with_list(self.player_sprite,self.fence_list)#player vs fence
         if len(hit5)!=0:
             print("Hitted by a fence! Instakill.")
             self.gameover = True
-        if self.lv3 == True:
-            hit6 = arcade.check_for_collision_with_list(self.player_sprite,self.enemyair_sprites_list)#player vs airforce
-            if len(hit6)!=0:
-                for enemyair in hit6:
-                    self.hp-=enemyair.hp
-                    enemyair.kill()
-                    print("Hitted by a kamikaze! Hp-",enemyair.hp)
-        if self.lv4 == True:
-            hit7 = arcade.check_for_collision_with_list(self.player_sprite,self.enemyred_sprites_list)#player vs elite tank
-            if len(hit7)!=0:
-                for enemyred in hit7:
-                    self.hp-=2
-                    enemyred.kill()
-                    print("Hitted by an elite tank! Hp-2")
-            hit8 = arcade.check_for_collision_with_list(self.player_sprite,self.enemyred_bullet_sprites_list)#player vs elite tank's bullet
-            if len(hit8)!=0:
-                for redbullet in hit8:
-                    self.hp-=1
-                    redbullet.kill()
-                    print("Hitted by a bullet! Hp-1")
-        if self.autodropped == True:
-            hit9 = arcade.check_for_collision_with_list(self.player_sprite,self.gun_auto_list)#player vs autogun
-            if len(hit9)!=0:
-                for gunauto in hit9:
-                    gunauto.kill()
-                    self.automatic = True
-                    print("Autogun activated.")
-        if self.BOSS == True:
-            hit10 = arcade.check_for_collision_with_list(self.player_sprite,self.boss_sprite)#player vs boss
-            if len(hit10)!=0:
-                print("Coup by Prayeth! Instakill.")
-                self.gameover = True
-            hit11 = arcade.check_for_collision_with_list(self.player_sprite,self.nuclear_sprites_list)
-            if len(hit11)!=0:
-                for nuclear in hit11:
-                    self.hp-=3
-                    nuclear.kill()
-                    print("Hitted by a nuclear! Hp-3")                
+ 
+        hit6 = arcade.check_for_collision_with_list(self.player_sprite,self.enemyair_sprites_list)#player vs airforce
+        if len(hit6)!=0:
+            for enemyair in hit6:
+                self.hp-=enemyair.hp
+                enemyair.kill()
+                print("Hitted by a kamikaze! Hp-",enemyair.hp)
+ 
+        hit7 = arcade.check_for_collision_with_list(self.player_sprite,self.enemyred_sprites_list)#player vs elite tank
+        if len(hit7)!=0:
+            for enemyred in hit7:
+                self.hp-=2
+                enemyred.kill()
+                print("Hitted by an elite tank! Hp-2")
+        
+        hit8 = arcade.check_for_collision_with_list(self.player_sprite,self.enemyred_bullet_sprites_list)#player vs elite tank's bullet
+        if len(hit8)!=0:
+            for redbullet in hit8:
+                self.hp-=1
+                redbullet.kill()
+                print("Hitted by a bullet! Hp-1")
+
+        hit9 = arcade.check_for_collision_with_list(self.player_sprite,self.gun_auto_list)#player vs autogun
+        if len(hit9)!=0:
+            for gunauto in hit9:
+                gunauto.kill()
+                self.automatic = True
+                print("Autogun activated.")
+
+        hit10 = arcade.check_for_collision_with_list(self.player_sprite,self.boss_sprite)#player vs boss
+        if len(hit10)!=0:
+            print("Coup by Prayeth! Instakill.")
+            self.gameover = True
+            
+        hit11 = arcade.check_for_collision_with_list(self.player_sprite,self.nuclear_sprites_list)#player vs nuclear
+        if len(hit11)!=0:
+            for nuclear in hit11:
+                self.hp-=3
+                nuclear.kill()
+                print("Hitted by a nuclear! Hp-3")
+
+        hit12 = arcade.check_for_collision_with_list(self.player_sprite,self.heal_list)#player vs heal
+        if len(hit12)!=0:
+            for heal in hit12:
+                self.hp+=100
+                heal.kill()
+                print("Healed! Hp+100")
+
+        hit13 = arcade.check_for_collision_with_list(self.player_sprite,self.enemyblue_sprites_list)#player vs thorn tank
+        if len(hit13)!=0:
+            for enemyblue in hit13:
+                enemyblue.kill()
+                self.hp-=3
+                print("Hitted by a thorn tank! Hp-3")
 
         #gameover status
         if self.hp <= 0:
@@ -345,7 +393,7 @@ class SpaceGameWindow(arcade.Window):
         if symbol == arcade.key.SPACE and self.automatic == False:
             if self.multigun == True:#upgrade
                 for i in range(3):
-                    bullet = Bullet("images/bullet.png",SCALE*0.8)
+                    bullet = Bullet("images/bullet.png",SCALE*0.9)
                     bullet.center_x = self.player_sprite.center_x-(self.player_sprite.width/2*(i-1))
                     bullet.bottom = self.player_sprite.top
                     self.bullet_sprites_list.append(bullet)
@@ -359,11 +407,11 @@ class SpaceGameWindow(arcade.Window):
         #moving
         if symbol == arcade.key.LEFT:
             self.player_sprite.vx = -1-self.speedup
-        elif symbol == arcade.key.RIGHT:
+        if symbol == arcade.key.RIGHT:
             self.player_sprite.vx = 1+self.speedup
         if symbol == arcade.key.UP:
             self.player_sprite.vy = 1+self.speedup
-        elif symbol == arcade.key.DOWN:
+        if symbol == arcade.key.DOWN:
             self.player_sprite.vy = -1-self.speedup         
     def on_key_release(self, symbol, modifiers):
         #stop moving
