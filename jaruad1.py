@@ -103,9 +103,9 @@ class SpaceGameWindow(arcade.Window):
             self.current_lv = '4'
         elif self.score>=500 and self.bossdefeat == False:
             self.current_lv = '5 (BOSS)'
-        elif self.bossdefeat == True and self.score <1200:
+        elif self.bossdefeat == True and self.score <1000:
             self.current_lv = '6'
-        elif self.bossdefeat == True and self.score >=1200:
+        elif self.bossdefeat == True and self.score >=1000:
             self.current_lv = '7'
 
         #spawning enemy : Vanilla Tank
@@ -138,7 +138,7 @@ class SpaceGameWindow(arcade.Window):
             enemyair = EnemyAirforce("images/enemyair.png", SCALE*1.1)
             if enemyair.center_x> SCREEN_WIDTH/2:
                 enemyair.angle = 180
-            enemyair.hp = random.randrange(5)+3
+            enemyair.hp = random.randrange(5)+4
             self.enemyair_sprites_list.append(enemyair)
             self.all_sprites_list.append(enemyair)
 
@@ -155,7 +155,7 @@ class SpaceGameWindow(arcade.Window):
 
         if self.framecount%150==0 and self.lv4 == True:
             enemyred = EnemyRed("images/enemyred.png", SCALE)
-            enemyred.hp = 8
+            enemyred.hp = 15
             self.enemyred_sprites_list.append(enemyred)
             self.all_sprites_list.append(enemyred)
 
@@ -192,7 +192,7 @@ class SpaceGameWindow(arcade.Window):
             enemyblue = EnemyBlue("images/enemyblue.png", SCALE)
             if enemyblue.center_y < SCREEN_HEIGHT/2:
                 enemyblue.angle = 180
-            enemyblue.hp = 15
+            enemyblue.hp = 20
             self.enemyblue_sprites_list.append(enemyblue)
             self.all_sprites_list.append(enemyblue)
 
@@ -201,7 +201,7 @@ class SpaceGameWindow(arcade.Window):
             self.lv7 = True
         if self.framecount%25==0 and self.lv7 == True:
             ghost = Stealth("images/ghost.png", SCALE)
-            ghost.hp = 13
+            ghost.hp = 8
             self.ghost_sprites_list.append(ghost)
             self.all_sprites_list.append(ghost)
 
