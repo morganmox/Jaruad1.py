@@ -21,6 +21,8 @@ class SpaceGameWindow(arcade.Window):
         self.hp_text = None
         self.boss_hp = 100
         self.boss_hp_text = None
+        self.current_lv = '1'
+        self.current_lv_text = None
         self.gameover = False
         self.speedup = 0
         self.speeddropped = False
@@ -66,9 +68,9 @@ class SpaceGameWindow(arcade.Window):
         output = f"Score = {self.score}"
         if not self.score_text or output != self.score_text.text:
             self.score_text = arcade.create_text(output, arcade.color.WHITE, 20)
-        arcade.render_text(self.score_text, SCREEN_WIDTH/2-50, SCREEN_HEIGHT-60)
+        arcade.render_text(self.score_text, SCREEN_WIDTH/25, SCREEN_HEIGHT*1.72/25)
         #hp
-        output2 = f"Player : {self.hp}"
+        output2 = f"Player's HP : {self.hp}"
         if not self.hp_text or output2 != self.hp_text.text:
             self.hp_text = arcade.create_text(output2, arcade.color.WHITE, 20)
         arcade.render_text(self.hp_text, SCREEN_WIDTH/25, SCREEN_HEIGHT/25)
@@ -78,10 +80,28 @@ class SpaceGameWindow(arcade.Window):
             if not self.boss_hp_text or output3 != self.boss_hp_text.text:
                 self.boss_hp_text = arcade.create_text(output3, arcade.color.RED, 20)
             arcade.render_text(self.boss_hp_text, SCREEN_WIDTH*17/25, SCREEN_HEIGHT/25)
+        #current level
+        output4 = f"Level : {self.current_lv}"
+        if not self.current_lv_text or output4 != self.current_lv_text.text:
+            self.current_lv_text = arcade.create_text(output4, arcade.color.WHITE, 20)
+        arcade.render_text(self.current_lv_text, SCREEN_WIDTH/25, SCREEN_HEIGHT*2.44/25)
 
     def update(self,x):
         self.all_sprites_list.update()
         self.framecount+=1
+        #update current level
+        if self.score>=0 and self.score <30:
+            self.current_lv = '1'
+        elif self.score>=30 and self.score <100:
+            self.current_lv = '2'
+        elif self.score>=100 and self.score <300:
+            self.current_lv = '3'
+        elif self.score>=300 and self.score <500:
+            self.current_lv = '4'
+        elif self.score>=500 and self.bossdefeat == False:
+            self.current_lv = '5 (BOSS)'
+        elif self.bossdefeat == True:
+            self.current_lv = '6 (Endless)'
 
         #spawning enemy : Vanilla Tank
         if self.framecount%12==0:
@@ -415,14 +435,10 @@ class SpaceGameWindow(arcade.Window):
             self.player_sprite.vy = -1-self.speedup         
     def on_key_release(self, symbol, modifiers):
         #stop moving
-        if symbol == arcade.key.LEFT:
+        if symbol == arcade.key.LEFT or symbol == arcade.key.RIGHT:
             self.player_sprite.vx = 0
-        elif symbol == arcade.key.RIGHT:
-            self.player_sprite.vx = 0
-        if symbol == arcade.key.UP:
-            self.player_sprite.vy = 0
-        elif symbol == arcade.key.DOWN:
-            self.player_sprite.vy = 0            
+        elif symbol == arcade.key.UP or symbol == arcade.key.DOWN:
+            self.player_sprite.vy = 0          
  
 if __name__ == '__main__':
     window = SpaceGameWindow(SCREEN_WIDTH, SCREEN_HEIGHT)
