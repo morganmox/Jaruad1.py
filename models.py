@@ -5,6 +5,20 @@ SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 800
 SCALE = 1.4
 
+class Stealth(arcade.Sprite):
+    def __init__(self,filename,scale):
+        super().__init__(filename,scale)
+        self.center_y = SCREEN_HEIGHT
+        self.center_x = random.randrange(SCREEN_WIDTH-30)+30
+        self.vy = 25
+        
+    def update(self):
+        if self.vy>=4:
+            self.vy-=1
+        self.center_y-=self.vy
+        if self.center_y<0:
+            self.kill()
+
 class EnemyBlue(arcade.Sprite):
     def __init__(self,filename,scale):
         super().__init__(filename,scale)

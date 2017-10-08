@@ -53,3 +53,13 @@
 -score worth = 20
 -collision damage = 3
 -weapon = Thorn (reflect damage)
+
+7.Ghost plane (boss defeated ,score = 1000)
+-LV = 7
+-hp = 13
+-speed = 25-- to 4
+-score worth = 15
+-collision damage = 1 per 5 frame
+-weapon = Life drain (lifesteal when do damage)
+*don't get killed on collision
+*invisible

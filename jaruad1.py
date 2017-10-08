@@ -1,7 +1,7 @@
 import arcade
 import random
 import sys
-from models import Enemy,Bullet,Ship,EnemySubmarine,Torpedo,Greenfoot,EnemyAirforce,EnemyRed,Redbullet,BOSS,EnemyBlue
+from models import * #* = เอามาแม่งให้หมดอ่ะ
 #ตรงนี้อย่าซน
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 800
@@ -38,6 +38,8 @@ class SpaceGameWindow(arcade.Window):
         self.lv3 = False
         self.lv4 = False
         self.BOSS = False
+        self.lv6 = False
+        self.lv7 = False
         #create all sprite array
         self.all_sprites_list = arcade.SpriteList()
         self.enemy_sprites_list = arcade.SpriteList()
@@ -49,6 +51,7 @@ class SpaceGameWindow(arcade.Window):
         self.boss_sprite = arcade.SpriteList()
         self.nuclear_sprites_list = arcade.SpriteList()
         self.enemyblue_sprites_list = arcade.SpriteList()
+        self.ghost_sprites_list = arcade.SpriteList()
         self.gun_auto_list = arcade.SpriteList()
         self.heal_list = arcade.SpriteList()
         self.bullet_sprites_list = arcade.SpriteList()
@@ -65,7 +68,7 @@ class SpaceGameWindow(arcade.Window):
         arcade.start_render()
         self.all_sprites_list.draw()
         #scoreboard
-        output = f"Score = {self.score}"
+        output = f"Score : {self.score}"
         if not self.score_text or output != self.score_text.text:
             self.score_text = arcade.create_text(output, arcade.color.WHITE, 20)
         arcade.render_text(self.score_text, SCREEN_WIDTH/25, SCREEN_HEIGHT*1.72/25)
@@ -100,11 +103,13 @@ class SpaceGameWindow(arcade.Window):
             self.current_lv = '4'
         elif self.score>=500 and self.bossdefeat == False:
             self.current_lv = '5 (BOSS)'
-        elif self.bossdefeat == True:
-            self.current_lv = '6 (Endless)'
+        elif self.bossdefeat == True and self.score <1200:
+            self.current_lv = '6'
+        elif self.bossdefeat == True and self.score >=1200:
+            self.current_lv = '7'
 
         #spawning enemy : Vanilla Tank
-        if self.framecount%12==0:
+        if self.framecount%12==0 and self.lv7 == False:
             enemy = Enemy("images/enemy.png", SCALE)
             self.enemy_sprites_list.append(enemy)
             self.all_sprites_list.append(enemy)
@@ -181,7 +186,9 @@ class SpaceGameWindow(arcade.Window):
                     self.all_sprites_list.append(redbullet)
 
         #spawning enemy level 6 :  Thorn Tank
-        if self.bossdefeat == True and self.framecount%130==0:
+        if self.bossdefeat == True:
+            self.lv6 = True
+        if self.framecount%150==0 and self.lv6 == True:
             enemyblue = EnemyBlue("images/enemyblue.png", SCALE)
             if enemyblue.center_y < SCREEN_HEIGHT/2:
                 enemyblue.angle = 180
@@ -189,9 +196,18 @@ class SpaceGameWindow(arcade.Window):
             self.enemyblue_sprites_list.append(enemyblue)
             self.all_sprites_list.append(enemyblue)
 
+        #spawning enemy level 7 : Ghost Plane
+        if self.score>=1000 and self.bossdefeat == True:
+            self.lv7 = True
+        if self.framecount%25==0 and self.lv7 == True:
+            ghost = Stealth("images/ghost.png", SCALE)
+            ghost.hp = 13
+            self.ghost_sprites_list.append(ghost)
+            self.all_sprites_list.append(ghost)
+
         #automatic shooting
         if self.automatic == True:
-            if self.framecount%8==0:
+            if self.framecount%7==0:
                 if self.multigun == True:#upgrade
                     for i in range(3):
                         bullet = Bullet("images/bullet.png",SCALE*0.9)
@@ -288,7 +304,6 @@ class SpaceGameWindow(arcade.Window):
                     self.BOSS = False
                     self.bossdefeat = True
                     print("Killed general Prayeth! score+44")
-                    print("Game complete! Entering endless mode.")
             hit6 = arcade.check_for_collision_with_list(bullet,self.nuclear_sprites_list)
             if len(hit6)!=0:
                 bullet.kill()
@@ -307,6 +322,15 @@ class SpaceGameWindow(arcade.Window):
                     self.score+=20
                     enemyblue.kill()
                     print("Killed a thorn tank. score+20")
+            hit8 = arcade.check_for_collision_with_list(bullet,self.ghost_sprites_list)
+            if len(hit8)!=0:
+                bullet.kill()
+            for ghost in hit8:
+                ghost.hp-=1
+                if ghost.hp<=0:
+                    self.score+=15
+                    ghost.kill()
+                    print("Killed a ghost plane. score+15")
 
         #collision checking (enemies/upgrade vs player)       
         hit = arcade.check_for_collision_with_list(self.player_sprite,self.enemy_sprites_list)#player vs tank
@@ -385,9 +409,9 @@ class SpaceGameWindow(arcade.Window):
         hit12 = arcade.check_for_collision_with_list(self.player_sprite,self.heal_list)#player vs heal
         if len(hit12)!=0:
             for heal in hit12:
-                self.hp+=100
+                self.hp+=200
                 heal.kill()
-                print("Healed! Hp+100")
+                print("Healed! Hp+200")
 
         hit13 = arcade.check_for_collision_with_list(self.player_sprite,self.enemyblue_sprites_list)#player vs thorn tank
         if len(hit13)!=0:
@@ -395,6 +419,15 @@ class SpaceGameWindow(arcade.Window):
                 enemyblue.kill()
                 self.hp-=3
                 print("Hitted by a thorn tank! Hp-3")
+
+        hit14 = arcade.check_for_collision_with_list(self.player_sprite,self.ghost_sprites_list)
+        if len(hit14)!=0:
+            for ghost in hit14:
+                if self.framecount%5==0:
+                    self.hp-=1
+                    ghost.hp+=1
+                    print("A ghost plane consumed your soul! Hp-1 rapidly.")
+        
 
         #gameover status
         if self.hp <= 0:
