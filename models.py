@@ -12,7 +12,7 @@ class Falcon(arcade.Sprite):
         self.center_x = random.randrange(SCREEN_WIDTH-30)+30
         
     def update(self):
-        self.center_y-=13
+        self.center_y-=12
         if self.center_y<0:
             self.kill()
 
@@ -21,7 +21,7 @@ class Falconbullet(arcade.Sprite):
         super().__init__(filename,scale)
         
     def update(self):
-        self.center_y-=20
+        self.center_y-=18
         if self.center_y<0:
             self.kill()
 

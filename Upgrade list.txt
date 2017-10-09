@@ -1,0 +1,5 @@
+Green = Speed up
+Cream = Automatic gun
+Grey = Multi gun
+White = Heal
+Red = Lifesteal

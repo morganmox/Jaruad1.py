@@ -46,6 +46,7 @@ class SpaceGameWindow(arcade.Window):
         self.lv6 = False
         self.lv7 = False
         self.lv8 = False
+        self.lv9 = False
         #create all sprite array
         self.all_sprites_list = arcade.SpriteList() # for drawing
         self.bullet_sprites_list = arcade.SpriteList() # player bullet
@@ -102,8 +103,10 @@ class SpaceGameWindow(arcade.Window):
             self.current_lv = '6'
         elif self.bossdefeat == True and self.score >=1000 and self.score <1400:
             self.current_lv = '7'
-        elif self.bossdefeat == True and self.score>=1400:
+        elif self.bossdefeat == True and self.score>=1400 and self.score <3000:
             self.current_lv = '8'
+        elif self.bossdefeat == True and self.score>=3000 and self.score <5000:
+            self.current_lv = '9'
 
         #spawning fence
         if self.framecount%75==0:
@@ -209,7 +212,7 @@ class SpaceGameWindow(arcade.Window):
             enemy = Stealth("images/ghost.png", SCALE)
             enemy.hp = 8
             enemy.damage = 1
-            enemy.worth = 15
+            enemy.worth = 10
             enemy.unknown = True
             enemy.type = 'Ghost Plane'
             self.enemy_sprites_list.append(enemy)
@@ -218,7 +221,7 @@ class SpaceGameWindow(arcade.Window):
         #spawning enemy level 8 : F-22 Falcon
         if self.score>=1400 and self.bossdefeat == True:
             self.lv8 = True
-        if self.framecount%22==0 and self.lv8 == True:
+        if self.framecount%35==0 and self.lv8 == True:
             enemy = Falcon("images/Falcon.png", SCALE)
             enemy.hp = 12
             enemy.damage = 0
@@ -227,6 +230,18 @@ class SpaceGameWindow(arcade.Window):
             enemy.type = 'F-22 Falcon'
             self.enemy_sprites_list.append(enemy)
             self.all_sprites_list.append(enemy)
+
+        #spawning enemy level 9 : Plague Tank
+        if self.score>=3000 and self.bossdefeat == True:
+            self.lv9 = True
+        if self.framecount%25==0 and self.lv9 == True:
+            enemy = Enemy("images/enemyplague.png",SCALE)
+            enemy.hp = 10
+            enemy.damage = 10
+            enemy.worth = 10
+            enemy.type = 'Plague Tank'
+            self.enemy_sprites_list.append(enemy)
+            self.all_sprites_list.append(enemy)   
 
         #bullet from enemies
         for enemy in self.enemy_sprites_list:
@@ -258,15 +273,19 @@ class SpaceGameWindow(arcade.Window):
                     self.enemy_bullet_sprites_list.append(enemybullet)
                     self.all_sprites_list.append(enemybullet)
             elif enemy.type == 'F-22 Falcon':
-                if self.framecount%15==0:
+                if self.framecount%20==0:
                     for i in range(2):
                         enemybullet = Falconbullet("images/bulletenemy.png",SCALE*0.9)
                         enemybullet.center_x = enemy.center_x-(enemy.width/4)+(enemy.width/2*i)
                         enemybullet.top = enemy.bottom
                         enemybullet.damage = 1
-                        enemybullet.type = 'Bullet'
+                        enemybullet.type = 'Ruin king'
                         self.enemy_bullet_sprites_list.append(enemybullet)
                         self.all_sprites_list.append(enemybullet)
+            elif enemy.type == 'Plague Tank':
+                if self.framecount%18==0:
+                    self.hp-=1
+                    print("You are cursed! Hp-1")
 
         #automatic shooting
         if self.automatic == True:
@@ -418,8 +437,12 @@ class SpaceGameWindow(arcade.Window):
         hit5 = arcade.check_for_collision_with_list(self.player_sprite,self.enemy_bullet_sprites_list)
         if len(hit5)!=0:
             for enemybullet in hit5:
-                self.hp-=enemybullet.damage
-                print("Got hit by",enemybullet.type,"! hp-",enemybullet.damage)
+                if enemybullet.type == 'Ruin king':
+                    self.hp = int(self.hp*96/100)
+                    print("Got hit by Falcon's bullet! hp-4%")
+                else:
+                    self.hp-=enemybullet.damage
+                    print("Got hit by",enemybullet.type,"! hp-",enemybullet.damage)
                 enemybullet.kill()
 
         #gameover status

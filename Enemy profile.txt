@@ -58,7 +58,7 @@
 -LV = 7
 -hp = 8
 -speed = 25-- to 4
--score worth = 15
+-score worth = 10
 -collision damage = 1 per 5 frame
 -weapon = Life drain (lifesteal when do damage)
 -not destroy on collision
@@ -67,8 +67,17 @@
 8.F-22 falcon (score = 1400)
 -LV = 8
 -hp = 12
--speed = 13
+-speed = 12
 -score worth = 20
 -collision damage = Player's hp/2
--weapon = 2XBullet (speed = 20,damage = 1)
+*Player's hp<=40 = Instant kill.
+-weapon = 2 X Ruin king (speed = 18,damage = 4%hp)
 -not destroy on collision
+
+9.Plague tank (score = 3000)
+-LV = 9
+-hp = 10
+-speed = 5-9
+-score worth = 10
+-collision damage = 10
+-weapon = Plague (1 global damage per 18 frame)
