@@ -16,7 +16,7 @@
 
 2.Submarine (score = 30)
 -LV = 2
--hp = 1
+-hp = 2
 -speed = ???
 -score worth = 2
 -collision damage = none
@@ -24,7 +24,7 @@
 
 3.Kamikaze (score = 100)
 -LV = 3
--hp = 4-5
+-hp = 3-5
 -speed = 0++
 -score worth = 3
 -collision damage = remaining hp.
@@ -32,7 +32,7 @@
 
 4.Elite tank (score = 300)
 -LV = 4
--hp = 15
+-hp = 9
 -speed =  x:3 , y:1
 -score worth = 5
 -collision damage = 2
@@ -44,11 +44,11 @@
 -speed = 3
 -score worth = 44
 -collision damage = instant kill.
--weapon = 1.Bullet (speed = 2++,damage = 1) 2.Nuclear (speed = 2++,hp = 6,damage = 3)
+-weapon = 1.Bullet (speed = 2++,damage = 2) 2.Nuclear (speed = 2++,hp = 6,damage = 3)
 
 6.Thorn tank (boss defeated)
 -LV = 6
--hp = 20
+-hp = 15
 -speed = 2
 -score worth = 20
 -collision damage = 3

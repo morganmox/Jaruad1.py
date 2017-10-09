@@ -162,8 +162,8 @@ class Ship(arcade.Sprite):
         self.vy = 0
 
     def update(self):
-        self.center_x+=self.vx*5
-        self.center_y+=self.vy*5
+        self.center_x+=self.vx*7
+        self.center_y+=self.vy*7
 
         if self.center_x>SCREEN_WIDTH:
             self.center_x = 0
