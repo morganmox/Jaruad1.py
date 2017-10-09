@@ -5,11 +5,34 @@ SCREEN_WIDTH = 700
 SCREEN_HEIGHT = 700
 SCALE = 1.225
 
+class Hamtaro(arcade.Sprite):
+    def __init__(self,filename,scale):
+        super().__init__(filename,scale)
+        self.center_x = random.randrange(SCREEN_WIDTH-25)+25
+        self.center_y = SCREEN_HEIGHT
+
+    def update(self):
+        if self.center_y > SCREEN_HEIGHT-135:
+            self.center_y-=1
+class Seed(arcade.Sprite):
+    def __init__(self,filename,scale):
+        super().__init__(filename,scale)
+        if random.randrange(2)==0:
+            self.vx = 6
+        else:
+            self.vx = -6
+
+    def update(self):
+        self.center_y-=2
+        self.center_x+=self.vx
+        if self.center_x>SCREEN_WIDTH or self.center_x<0:
+            self.vx*=-1
+        
 class Falcon(arcade.Sprite):
     def __init__(self,filename,scale):
         super().__init__(filename,scale)
         self.center_y = SCREEN_HEIGHT
-        self.center_x = random.randrange(SCREEN_WIDTH-30)+30
+        self.center_x = random.randrange(SCREEN_WIDTH-25)+25
         
     def update(self):
         self.center_y-=12
@@ -29,7 +52,7 @@ class Stealth(arcade.Sprite):
     def __init__(self,filename,scale):
         super().__init__(filename,scale)
         self.center_y = SCREEN_HEIGHT
-        self.center_x = random.randrange(SCREEN_WIDTH-30)+30
+        self.center_x = random.randrange(SCREEN_WIDTH-25)+25
         self.vy = 25
         
     def update(self):
@@ -48,7 +71,7 @@ class EnemyBlue(arcade.Sprite):
             self.center_y = 0
         else:
             self.center_y = SCREEN_HEIGHT
-        self.center_x = random.randrange(SCREEN_WIDTH-50)+50
+        self.center_x = random.randrange(SCREEN_WIDTH-40)+40
 
     def update(self):
         if self.initpos == "top":
@@ -68,11 +91,11 @@ class BOSS(arcade.Sprite):
         self.vx = 3
 
     def update(self):
-        if self.center_y > SCREEN_HEIGHT-140:
+        if self.center_y > SCREEN_HEIGHT-120:
             self.center_y-=1
         else:
             self.center_x +=self.vx
-            if self.center_x >SCREEN_WIDTH-80 or self.center_x <80 or random.randrange(100)<1:
+            if self.center_x >SCREEN_WIDTH-60 or self.center_x <60 or random.randrange(100)<1:
                 self.vx*=-1     
 
 class EnemyRed(arcade.Sprite):
@@ -156,7 +179,7 @@ class Enemy(arcade.Sprite):
     def __init__(self,filename,scale):
         super().__init__(filename,scale)
         self.center_y = SCREEN_HEIGHT
-        self.center_x = random.randrange(SCREEN_WIDTH)
+        self.center_x = random.randrange(SCREEN_WIDTH-5)+5
         self.vy = random.randrange(5)+5
         
     def update(self):

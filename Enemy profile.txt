@@ -81,3 +81,11 @@
 -score worth = 10
 -collision damage = 10
 -weapon = Plague (1 global damage per 21 frame)
+
+10.Xhamster (score = 2800)
+-LV = 10
+-hp = 30
+-speed = 1
+-score worth = 30
+-collision damage = 5
+-weapon = Hamster's shit (speed = x:6 y:4, damage = 2, score -1,*5% critical damage => 10%hp)

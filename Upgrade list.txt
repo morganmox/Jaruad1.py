@@ -3,3 +3,4 @@ Cream = Automatic gun
 Grey = Multi gun
 White = Heal
 Red = Lifesteal
+Orange = Rapidfire (Automatic required)
