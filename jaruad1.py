@@ -3,19 +3,17 @@ import random
 import sys
 from models import * #* = เอามาแม่งให้หมดอ่ะ
 #ตรงนี้อย่าซน
-SCREEN_WIDTH = 800
-SCREEN_HEIGHT = 800
-SCALE = 1.4
-
+SCREEN_WIDTH = 700
+SCREEN_HEIGHT = 700
+SCALE = 1.225
 class SpaceGameWindow(arcade.Window):
     def __init__(self, width, height):
         super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT)
-
         #bg setting,framecount
         arcade.set_background_color(arcade.color.AMAZON)
         self.framecount = 0
         #scoring/starting hp/gameover status
-        self.hp = 175
+        self.hp = 200
         self.score = 0
         self.score_text = None
         self.hp_text = None
@@ -24,6 +22,7 @@ class SpaceGameWindow(arcade.Window):
         self.current_lv = '1'
         self.current_lv_text = None
         self.gameover = False
+        self.curse = 0
         #upgrade status
         self.speedup = 0
         self.multigun = False
@@ -66,32 +65,30 @@ class SpaceGameWindow(arcade.Window):
         #scoreboard
         output = f"Score : {self.score}"
         if not self.score_text or output != self.score_text.text:
-            self.score_text = arcade.create_text(output, arcade.color.WHITE, 20)
+            self.score_text = arcade.create_text(output, arcade.color.WHITE, 17)
         arcade.render_text(self.score_text, SCREEN_WIDTH/25, SCREEN_HEIGHT*1.72/25)
         #hp
         output2 = f"Player's HP : {self.hp}"
         if not self.hp_text or output2 != self.hp_text.text:
-            self.hp_text = arcade.create_text(output2, arcade.color.WHITE, 20)
+            self.hp_text = arcade.create_text(output2, arcade.color.WHITE, 17)
         arcade.render_text(self.hp_text, SCREEN_WIDTH/25, SCREEN_HEIGHT/25)
         #bosshp
         if self.BOSS == True:
             output3 = f"General Prayeth : {self.boss_hp}"
             if not self.boss_hp_text or output3 != self.boss_hp_text.text:
-                self.boss_hp_text = arcade.create_text(output3, arcade.color.RED, 20)
+                self.boss_hp_text = arcade.create_text(output3, arcade.color.RED, 17)
             arcade.render_text(self.boss_hp_text, SCREEN_WIDTH*17/25, SCREEN_HEIGHT/25)
         #current level
         output4 = f"Level : {self.current_lv}"
         if not self.current_lv_text or output4 != self.current_lv_text.text:
-            self.current_lv_text = arcade.create_text(output4, arcade.color.WHITE, 20)
+            self.current_lv_text = arcade.create_text(output4, arcade.color.WHITE, 17)
         arcade.render_text(self.current_lv_text, SCREEN_WIDTH/25, SCREEN_HEIGHT*2.44/25)
 
     def update(self,x):
         self.all_sprites_list.update()
         self.framecount+=1
         #update current level
-        if self.score>=0 and self.score <30:
-            self.current_lv = '1'
-        elif self.score>=30 and self.score <100:
+        if self.score>=30 and self.score <100:
             self.current_lv = '2'
         elif self.score>=100 and self.score <300:
             self.current_lv = '3'
@@ -103,9 +100,9 @@ class SpaceGameWindow(arcade.Window):
             self.current_lv = '6'
         elif self.bossdefeat == True and self.score >=1000 and self.score <1400:
             self.current_lv = '7'
-        elif self.bossdefeat == True and self.score>=1400 and self.score <3000:
+        elif self.bossdefeat == True and self.score>=1400 and self.score <2000:
             self.current_lv = '8'
-        elif self.bossdefeat == True and self.score>=3000 and self.score <5000:
+        elif self.bossdefeat == True and self.score>=2000 and self.score <2800:
             self.current_lv = '9'
 
         #spawning fence
@@ -182,7 +179,7 @@ class SpaceGameWindow(arcade.Window):
         #spawning nuclear (Boss's weapon)
         if self.BOSS == True and self.framecount%40==0:
             enemy = Redbullet("images/nuclear.png",SCALE)
-            enemy.center_x = random.randrange(SCREEN_WIDTH-40)+40
+            enemy.center_x = random.randrange(SCREEN_WIDTH-30)+30
             enemy.center_y = SCREEN_HEIGHT
             enemy.hp = 6
             enemy.damage = 3
@@ -199,7 +196,7 @@ class SpaceGameWindow(arcade.Window):
             if enemy.center_y < SCREEN_HEIGHT/2:
                 enemy.angle = 180
             enemy.hp = 15
-            enemy.damage = 3
+            enemy.damage = 6
             enemy.worth = 20
             enemy.type = 'Thorn Tank'
             self.enemy_sprites_list.append(enemy)
@@ -232,7 +229,7 @@ class SpaceGameWindow(arcade.Window):
             self.all_sprites_list.append(enemy)
 
         #spawning enemy level 9 : Plague Tank
-        if self.score>=3000 and self.bossdefeat == True:
+        if self.score>=2000 and self.bossdefeat == True:
             self.lv9 = True
         if self.framecount%25==0 and self.lv9 == True:
             enemy = Enemy("images/enemyplague.png",SCALE)
@@ -241,7 +238,11 @@ class SpaceGameWindow(arcade.Window):
             enemy.worth = 10
             enemy.type = 'Plague Tank'
             self.enemy_sprites_list.append(enemy)
-            self.all_sprites_list.append(enemy)   
+            self.all_sprites_list.append(enemy)
+        if self.framecount%21==0 and self.lv9 == True:#curse dps
+            self.hp-=self.curse
+            print("You are cursed! Hp-",self.curse)
+            self.curse = 0
 
         #bullet from enemies
         for enemy in self.enemy_sprites_list:
@@ -275,7 +276,7 @@ class SpaceGameWindow(arcade.Window):
             elif enemy.type == 'F-22 Falcon':
                 if self.framecount%20==0:
                     for i in range(2):
-                        enemybullet = Falconbullet("images/bulletenemy.png",SCALE*0.9)
+                        enemybullet = Falconbullet("images/falconbullet.png",SCALE*0.9)
                         enemybullet.center_x = enemy.center_x-(enemy.width/4)+(enemy.width/2*i)
                         enemybullet.top = enemy.bottom
                         enemybullet.damage = 1
@@ -283,9 +284,8 @@ class SpaceGameWindow(arcade.Window):
                         self.enemy_bullet_sprites_list.append(enemybullet)
                         self.all_sprites_list.append(enemybullet)
             elif enemy.type == 'Plague Tank':
-                if self.framecount%18==0:
-                    self.hp-=1
-                    print("You are cursed! Hp-1")
+                if self.framecount%21==0:
+                    self.curse+=1
 
         #automatic shooting
         if self.automatic == True:
@@ -336,6 +336,14 @@ class SpaceGameWindow(arcade.Window):
             self.upgrade_sprites_list.append(upgrade)
             self.all_sprites_list.append(upgrade)
 
+        #heal deployed randomly after level 9
+        if self.lv9 == True:
+            if random.randrange(250)==0:
+                upgrade = Greenfoot("images/d3.png",SCALE)
+                upgrade.type = 'Heal'
+                self.upgrade_sprites_list.append(upgrade)
+                self.all_sprites_list.append(upgrade)
+
         #lifesteal deployed after level 8
         if self.lv8 == True and self.lifestealdropped == False:
             self.lifestealdropped = True
@@ -365,11 +373,11 @@ class SpaceGameWindow(arcade.Window):
                 elif enemy.type == 'F-22 Falcon':#Falcon's soulrip
                     if enemy.soulripped == False:
                         enemy.soulripped = True
-                        if self.hp > 40:
+                        if self.hp > 50:
                             self.hp = int(self.hp/2)
                             print("Heavy damage from F-22 Falcon! Hp halved.")
                         else :
-                            print("Heavy damage from F-22 Falcon! Instant kill.(Hp<=40)")
+                            print("Heavy damage from F-22 Falcon! Instant kill.(Hp<=50)")
                             self.gameover = True
                 else:
                     self.hp-=enemy.damage
@@ -419,12 +427,12 @@ class SpaceGameWindow(arcade.Window):
                 elif upgrade.type == 'Multi':
                     self.multigun = True
                     print("Triple shot activated!")
-                elif upgrade.type == 'Heal':
-                    self.hp +=250
-                    print("Heal! hp+250")
                 elif upgrade.type == 'Lifesteal':
                     self.lifesteal = True
                     print("Lifesteal activated!")
+                elif upgrade.type == 'Heal':
+                    self.hp +=250
+                    print("Heal! hp+250")
                 upgrade.kill()
 
         #collision checking 4 (player vs fence)
@@ -457,6 +465,7 @@ class SpaceGameWindow(arcade.Window):
                 print("Not even close, baby!")
             elif self.BOSS == False and self.bossspawned == True:
                 print("You win! Thanks for playing. :D")
+            print(self.framecount)
             sys.exit()
             
     def on_key_press(self, symbol, modifiers):

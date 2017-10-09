@@ -51,7 +51,7 @@
 -hp = 15
 -speed = 2
 -score worth = 20
--collision damage = 3
+-collision damage = 6
 -weapon = Thorn (reflect damage)
 
 7.Ghost plane (boss defeated ,score = 1000)
@@ -61,7 +61,7 @@
 -score worth = 10
 -collision damage = 1 per 5 frame
 -weapon = Life drain (lifesteal when do damage)
--not destroy on collision
+-not destroy on collision.
 *invisible
 
 8.F-22 falcon (score = 1400)
@@ -70,14 +70,14 @@
 -speed = 12
 -score worth = 20
 -collision damage = Player's hp/2
-*Player's hp<=40 = Instant kill.
+*Player's hp<=50 = Instant kill.
 -weapon = 2 X Ruin king (speed = 18,damage = 4%hp)
--not destroy on collision
+-not destroy on collision.
 
-9.Plague tank (score = 3000)
+9.Plague tank (score = 2000)
 -LV = 9
 -hp = 10
 -speed = 5-9
 -score worth = 10
 -collision damage = 10
--weapon = Plague (1 global damage per 18 frame)
+-weapon = Plague (1 global damage per 21 frame)

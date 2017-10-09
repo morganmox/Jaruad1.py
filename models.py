@@ -1,9 +1,9 @@
 import arcade
 import random
 #ตรงนี้อย่าซน
-SCREEN_WIDTH = 800
-SCREEN_HEIGHT = 800
-SCALE = 1.4
+SCREEN_WIDTH = 700
+SCREEN_HEIGHT = 700
+SCALE = 1.225
 
 class Falcon(arcade.Sprite):
     def __init__(self,filename,scale):
