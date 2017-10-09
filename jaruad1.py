@@ -218,7 +218,7 @@ class SpaceGameWindow(arcade.Window):
         #spawning enemy level 8 : F-22 Falcon
         if self.score>=1400 and self.bossdefeat == True:
             self.lv8 = True
-        if self.framecount%25==0 and self.lv8 == True:
+        if self.framecount%22==0 and self.lv8 == True:
             enemy = Falcon("images/Falcon.png", SCALE)
             enemy.hp = 12
             enemy.damage = 0
@@ -346,8 +346,12 @@ class SpaceGameWindow(arcade.Window):
                 elif enemy.type == 'F-22 Falcon':#Falcon's soulrip
                     if enemy.soulripped == False:
                         enemy.soulripped = True
-                        self.hp = int(self.hp/2)
-                        print("Heavy damage from F-22 Falcon! Hp halved.")
+                        if self.hp > 40:
+                            self.hp = int(self.hp/2)
+                            print("Heavy damage from F-22 Falcon! Hp halved.")
+                        else :
+                            print("Heavy damage from F-22 Falcon! Instant kill.(Hp<=40)")
+                            self.gameover = True
                 else:
                     self.hp-=enemy.damage
                     print("Hitted by",enemy.type,"! Hp-",enemy.damage)
