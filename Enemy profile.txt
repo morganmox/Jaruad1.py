@@ -61,5 +61,14 @@
 -score worth = 15
 -collision damage = 1 per 5 frame
 -weapon = Life drain (lifesteal when do damage)
-*don't get killed on collision
+-not destroy on collision
 *invisible
+
+8.F-22 falcon (score = 1400)
+-LV = 8
+-hp = 12
+-speed = 13
+-score worth = 20
+-collision damage = Player's hp/2
+-weapon = 2XBullet (speed = 20,damage = 1)
+-not destroy on collision

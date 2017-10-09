@@ -14,23 +14,28 @@ class SpaceGameWindow(arcade.Window):
         #bg setting,framecount
         arcade.set_background_color(arcade.color.AMAZON)
         self.framecount = 0
-        #scoring/starting hp/upgrades
+        #scoring/starting hp/gameover status
+        self.hp = 175
         self.score = 0
         self.score_text = None
-        self.hp = 200
         self.hp_text = None
         self.boss_hp = 100
         self.boss_hp_text = None
         self.current_lv = '1'
         self.current_lv_text = None
         self.gameover = False
+        #upgrade status
         self.speedup = 0
-        self.speeddropped = False
         self.multigun = False
-        self.gundropped = False
         self.automatic = False
+        self.lifesteal = False
+        #upgrade/heal deploy status
+        self.gundropped = False
+        self.speeddropped = False
         self.autodropped = False
         self.healdropped = False
+        self.lifestealdropped = False
+        #boss status
         self.bossspawned = False
         self.bossdefeat = False
         #Level
@@ -40,6 +45,7 @@ class SpaceGameWindow(arcade.Window):
         self.BOSS = False
         self.lv6 = False
         self.lv7 = False
+        self.lv8 = False
         #create all sprite array
         self.all_sprites_list = arcade.SpriteList() # for drawing
         self.bullet_sprites_list = arcade.SpriteList() # player bullet
@@ -94,8 +100,10 @@ class SpaceGameWindow(arcade.Window):
             self.current_lv = '5 (BOSS)'
         elif self.bossdefeat == True and self.score <1000:
             self.current_lv = '6'
-        elif self.bossdefeat == True and self.score >=1000:
+        elif self.bossdefeat == True and self.score >=1000 and self.score <1400:
             self.current_lv = '7'
+        elif self.bossdefeat == True and self.score>=1400:
+            self.current_lv = '8'
 
         #spawning fence
         if self.framecount%75==0:
@@ -119,7 +127,7 @@ class SpaceGameWindow(arcade.Window):
         if self.score>=30:
             self.lv2 = True
                 
-        if self.framecount%30==0 and self.lv2 == True:
+        if self.framecount%30==0 and self.lv2 == True and self.lv8 == False:
             enemy = EnemySubmarine("images/enemysub.png", SCALE)
             enemy.hp = 2
             enemy.worth = 2
@@ -197,13 +205,26 @@ class SpaceGameWindow(arcade.Window):
         #spawning enemy level 7 : Ghost Plane
         if self.score>=1000 and self.bossdefeat == True:
             self.lv7 = True
-        if self.framecount%25==0 and self.lv7 == True:
+        if self.framecount%30==0 and self.lv7 == True:
             enemy = Stealth("images/ghost.png", SCALE)
             enemy.hp = 8
             enemy.damage = 1
             enemy.worth = 15
             enemy.unknown = True
             enemy.type = 'Ghost Plane'
+            self.enemy_sprites_list.append(enemy)
+            self.all_sprites_list.append(enemy)
+
+        #spawning enemy level 8 : F-22 Falcon
+        if self.score>=1400 and self.bossdefeat == True:
+            self.lv8 = True
+        if self.framecount%25==0 and self.lv8 == True:
+            enemy = Falcon("images/Falcon.png", SCALE)
+            enemy.hp = 12
+            enemy.damage = 0
+            enemy.soulripped = False
+            enemy.worth = 20
+            enemy.type = 'F-22 Falcon'
             self.enemy_sprites_list.append(enemy)
             self.all_sprites_list.append(enemy)
 
@@ -233,9 +254,19 @@ class SpaceGameWindow(arcade.Window):
                     enemybullet.center_x = enemy.center_x
                     enemybullet.top = enemy.bottom
                     enemybullet.damage = 2
-                    enemybullet.type = 'Bullet'
+                    enemybullet.type = 'Pistol'
                     self.enemy_bullet_sprites_list.append(enemybullet)
-                    self.all_sprites_list.append(enemybullet)                    
+                    self.all_sprites_list.append(enemybullet)
+            elif enemy.type == 'F-22 Falcon':
+                if self.framecount%15==0:
+                    for i in range(2):
+                        enemybullet = Falconbullet("images/bulletenemy.png",SCALE*0.9)
+                        enemybullet.center_x = enemy.center_x-(enemy.width/4)+(enemy.width/2*i)
+                        enemybullet.top = enemy.bottom
+                        enemybullet.damage = 1
+                        enemybullet.type = 'Bullet'
+                        self.enemy_bullet_sprites_list.append(enemybullet)
+                        self.all_sprites_list.append(enemybullet)
 
         #automatic shooting
         if self.automatic == True:
@@ -286,6 +317,14 @@ class SpaceGameWindow(arcade.Window):
             self.upgrade_sprites_list.append(upgrade)
             self.all_sprites_list.append(upgrade)
 
+        #lifesteal deployed after level 8
+        if self.lv8 == True and self.lifestealdropped == False:
+            self.lifestealdropped = True
+            upgrade = Greenfoot("images/d4.png",SCALE)
+            upgrade.type = 'Lifesteal'
+            self.upgrade_sprites_list.append(upgrade)
+            self.all_sprites_list.append(upgrade)
+
         #collision checking (enemies vs player)       
         hit = arcade.check_for_collision_with_list(self.player_sprite,self.enemy_sprites_list)
         if len(hit)!=0:
@@ -304,6 +343,11 @@ class SpaceGameWindow(arcade.Window):
                 elif enemy.type == 'General Prayeth':#Fatal damage (Boss)
                     print("Coup by General Prayeth! Instant death.")
                     self.gameover = True
+                elif enemy.type == 'F-22 Falcon':#Falcon's soulrip
+                    if enemy.soulripped == False:
+                        enemy.soulripped = True
+                        self.hp = int(self.hp/2)
+                        print("Heavy damage from F-22 Falcon! Hp halved.")
                 else:
                     self.hp-=enemy.damage
                     print("Hitted by",enemy.type,"! Hp-",enemy.damage)
@@ -314,6 +358,8 @@ class SpaceGameWindow(arcade.Window):
             hit2 = arcade.check_for_collision_with_list(bullet,self.enemy_sprites_list)
             if len(hit2)!=0:
                 bullet.kill()
+                if self.lifesteal == True:
+                    self.hp+=1   
             for enemy in hit2:
                 if enemy.type == 'General Prayeth':
                     enemy.hp-=1
@@ -343,16 +389,19 @@ class SpaceGameWindow(arcade.Window):
             for upgrade in hit3:
                 if upgrade.type == 'Auto':
                     self.automatic = True
-                    print("Automatic activated.")
+                    print("Automatic activated!")
                 elif upgrade.type == 'Speed':
                     self.speedup+=0.8
                     print("Speed up!")
                 elif upgrade.type == 'Multi':
                     self.multigun = True
-                    print("Triple shot activated.")
+                    print("Triple shot activated!")
                 elif upgrade.type == 'Heal':
-                    self.hp +=300
-                    print("Heal! hp+300")
+                    self.hp +=250
+                    print("Heal! hp+250")
+                elif upgrade.type == 'Lifesteal':
+                    self.lifesteal = True
+                    print("Lifesteal activated!")
                 upgrade.kill()
 
         #collision checking 4 (player vs fence)

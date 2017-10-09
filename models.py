@@ -5,6 +5,26 @@ SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 800
 SCALE = 1.4
 
+class Falcon(arcade.Sprite):
+    def __init__(self,filename,scale):
+        super().__init__(filename,scale)
+        self.center_y = SCREEN_HEIGHT
+        self.center_x = random.randrange(SCREEN_WIDTH-30)+30
+        
+    def update(self):
+        self.center_y-=13
+        if self.center_y<0:
+            self.kill()
+
+class Falconbullet(arcade.Sprite):
+    def __init__(self,filename,scale):
+        super().__init__(filename,scale)
+        
+    def update(self):
+        self.center_y-=20
+        if self.center_y<0:
+            self.kill()
+
 class Stealth(arcade.Sprite):
     def __init__(self,filename,scale):
         super().__init__(filename,scale)
