@@ -14,7 +14,7 @@ class SpaceGameWindow(arcade.Window):
         self.framecount = 0
         #scoring/starting hp/gameover status
         self.hp = 200
-        self.score = 1400
+        self.score = 0
         self.score_text = None
         self.hp_text = None
         self.boss_hp = 100
@@ -24,6 +24,7 @@ class SpaceGameWindow(arcade.Window):
         self.gameover = False
         self.curse = 0
         self.firedelay = 7
+        self.fenceproof = True
         #upgrade status
         self.speedup = 0
         self.multigun = False
@@ -472,8 +473,14 @@ class SpaceGameWindow(arcade.Window):
         #collision checking 4 (player vs fence)
         hit4 = arcade.check_for_collision_with_list(self.player_sprite,self.fence_sprites_list)
         if len(hit4)!=0:
-            print("Fence does fatal damage! Instant death.")
-            self.gameover = True
+            if self.fenceproof == True:
+                for fence in hit4:
+                    fence.kill()
+                self.fenceproof = False
+                print("You just used your fenceproof!")
+            else:
+                print("Fence does fatal damage! Instant death.")
+                self.gameover = True
 
         #collision checking 5 (player vs enemybullet)
         hit5 = arcade.check_for_collision_with_list(self.player_sprite,self.enemy_bullet_sprites_list)
