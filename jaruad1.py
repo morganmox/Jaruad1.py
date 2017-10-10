@@ -454,7 +454,7 @@ class SpaceGameWindow(arcade.Window):
                     self.automatic = True
                     print("Automatic activated!")
                 elif upgrade.type == 'Speed':
-                    self.speedup+=0.8
+                    self.speedup+=0.6
                     print("Speed up!")
                 elif upgrade.type == 'Multi':
                     self.multigun = True

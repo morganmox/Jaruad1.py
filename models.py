@@ -27,6 +27,8 @@ class Seed(arcade.Sprite):
         self.center_x+=self.vx
         if self.center_x>SCREEN_WIDTH or self.center_x<0:
             self.vx*=-1
+        if self.center_y<0:
+            self.kill()
         
 class Falcon(arcade.Sprite):
     def __init__(self,filename,scale):
@@ -200,7 +202,7 @@ class Ship(arcade.Sprite):
     def __init__(self,filename,scale):
         super().__init__(filename,scale)
         self.center_x = SCREEN_WIDTH/2
-        self.center_y = SCREEN_HEIGHT/2
+        self.center_y = 100
         self.vx = 0
         self.vy = 0
 
