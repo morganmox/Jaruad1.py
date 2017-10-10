@@ -3,9 +3,9 @@ import random
 import sys
 from models import * #* = เอามาแม่งให้หมดอ่ะ
 #ตรงนี้อย่าซน
-SCREEN_WIDTH = 700
-SCREEN_HEIGHT = 700
-SCALE = 1.225
+SCREEN_WIDTH = 600
+SCREEN_HEIGHT = 600
+SCALE = 1
 class SpaceGameWindow(arcade.Window):
     def __init__(self, width, height):
         super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT)

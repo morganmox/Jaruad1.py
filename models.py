@@ -1,9 +1,9 @@
 import arcade
 import random
 #ตรงนี้อย่าซน
-SCREEN_WIDTH = 700
-SCREEN_HEIGHT = 700
-SCALE = 1.225
+SCREEN_WIDTH = 600
+SCREEN_HEIGHT = 600
+SCALE = 1
 
 class Hamtaro(arcade.Sprite):
     def __init__(self,filename,scale):
