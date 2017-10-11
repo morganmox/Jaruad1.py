@@ -5,3 +5,4 @@ White = Heal
 Red = Lifesteal
 Orange = Rapidfire (Automatic required)
 Grey/Purple = More lifesteal (Lifesteal required)
+Small ship = 2xFunnel (Auto pilot assistant)

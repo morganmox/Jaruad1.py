@@ -26,13 +26,14 @@ class SpaceGameWindow(arcade.Window):
         self.curse = 0
         self.fenceproof = True
         #upgrade status
-        self.upgrades_list = ['speed','auto','multi','heal','lifesteal','rapid','satanic']#upgrade list not being deployed
+        self.upgrades_list = ['speed','auto','multi','heal','lifesteal','rapid','satanic','funnel']#upgrade list not being deployed
         self.speedup = 0
         self.firedelay = 7
-        self.leechamount = 1 
+        self.leechamount = 1
         self.multigun = False
         self.automatic = False
         self.lifesteal = False
+        self.funnel = False
         #boss status
         self.bossspawned = False
         self.bossdefeat = False
@@ -43,6 +44,7 @@ class SpaceGameWindow(arcade.Window):
         self.enemy_sprites_list = arcade.SpriteList() #enemy
         self.enemy_bullet_sprites_list = arcade.SpriteList() #enemy bullet
         self.fence_sprites_list = arcade.SpriteList() #fence
+        self.funnel_sprites_list = arcade.SpriteList() #funnel (test)
         self.upgrade_sprites_list = arcade.SpriteList() #upgrades
         self.player_sprite = Ship("images/ship.png", SCALE*0.95) #spawn ตัวคนเล่น
         self.all_sprites_list.append(self.player_sprite) #ยัดตัวคนเล่นเข้าไปใน list ที่จะวาด
@@ -104,11 +106,12 @@ class SpaceGameWindow(arcade.Window):
         def shooting(number,adjust):
             for i in range(number):
                 bullet = Bullet("images/bullet.png",SCALE*0.9)
+                bullet.type = 0
                 bullet.center_x = self.player_sprite.center_x-(self.player_sprite.width/2*(i-1+adjust))
                 bullet.bottom = self.player_sprite.top
                 self.bullet_sprites_list.append(bullet)
                 self.all_sprites_list.append(bullet)
-                
+        
         def enemyshoot(host,typed,damage):
             if host == 'Elite Tank' or host == 'General Prayeth' or host == 'Versatile Tank':
                 enemybullet = Redbullet("images/bulletenemy.png", SCALE*0.9)
@@ -133,8 +136,8 @@ class SpaceGameWindow(arcade.Window):
                 self.enemy_bullet_sprites_list.append(enemybullet)
                 self.all_sprites_list.append(enemybullet)
             
-        def upgrade(typed,images):
-            upgrade = Greenfoot(images, SCALE)
+        def upgrade(typed,images,mul):
+            upgrade = Greenfoot(images, SCALE*mul)
             upgrade.type = typed
             self.upgrade_sprites_list.append(upgrade)
             self.all_sprites_list.append(upgrade)
@@ -210,6 +213,16 @@ class SpaceGameWindow(arcade.Window):
                     enemyshoot('Versatile Tank','Bullet',4)
         #enemyshoot(ชื่อคนยิง,ชื่อกระสุน,damage ตอนโดน)
 
+        if self.funnel == True:#funnel ยิง
+            for funnel in self.funnel_sprites_list:
+                if self.framecount%(self.firedelay-1)==0:
+                    bullet = Bullet("images/falconbullet.png",SCALE*0.7)
+                    bullet.type = 1
+                    bullet.center_x = funnel.center_x
+                    bullet.bottom = funnel.top
+                    self.bullet_sprites_list.append(bullet)
+                    self.all_sprites_list.append(bullet)
+                    
         if self.automatic == True:#เปิดยิง auto
             if self.framecount%self.firedelay==0:
                 if self.multigun == True:#เปิดยิง 3 ลูก
@@ -220,28 +233,31 @@ class SpaceGameWindow(arcade.Window):
         #upgrades
         if self.score>= 20 and 'speed' in self.upgrades_list:
             self.upgrades_list.remove('speed') #speedup upgrade deployed
-            upgrade('Speed',"images/greenfoot.png")
+            upgrade('Speed',"images/greenfoot.png",1)
         if self.score>= 80 and 'multi' in self.upgrades_list:
             self.upgrades_list.remove('multi') #multigun upgrade deployed
-            upgrade('Multi',"images/d.png")
+            upgrade('Multi',"images/d.png",1)
         if self.score>=40 and 'auto' in self.upgrades_list:
             self.upgrades_list.remove('auto') #automatic upgrade deployed
-            upgrade('Auto',"images/d2.png")
+            upgrade('Auto',"images/d2.png",1)
         if self.bossdefeat == True and 'heal' in self.upgrades_list:
             self.upgrades_list.remove('heal') #heal deployed after boss defeated
-            upgrade('Heal',"images/d3.png")
-        if self.current_lv>=9: #heal deploy constantly after level 9
-            if self.framecount%300==0:
-                upgrade('Heal',"images/d3.png")
+            upgrade('Heal',"images/d3.png",1)
+        if self.current_lv>=9 and self.score<=3800: #heal deploy constantly after level 9
+            if self.framecount%350==0:
+                upgrade('Heal',"images/d3.png",1)
         if self.current_lv>=8 and 'lifesteal' in self.upgrades_list:
             self.upgrades_list.remove('lifesteal') #lifesteal deployed after level 8
-            upgrade('Lifesteal',"images/d4.png")
+            upgrade('Lifesteal',"images/d4.png",1)
         if self.score>=2500 and 'rapid' in self.upgrades_list:
             self.upgrades_list.remove('rapid') #rapidfire deployed after score>=2500
-            upgrade('Gatling',"images/d5.png")
+            upgrade('Gatling',"images/d5.png",1)
         if self.score>=3800 and 'satanic' in self.upgrades_list:
-            self.upgrades_list.remove('satanic')
-            upgrade('SATANIC',"images/d6.png")
+            self.upgrades_list.remove('satanic') #improve lifesteal
+            upgrade('SATANIC',"images/d6.png",1)
+        if self.current_lv>=4 and 'funnel' in self.upgrades_list:
+            self.upgrades_list.remove('funnel')
+            upgrade('funnel',"images/ship.png",0.55)
 
         #collision checking (enemies vs player)       
         hit = arcade.check_for_collision_with_list(self.player_sprite,self.enemy_sprites_list)
@@ -279,14 +295,14 @@ class SpaceGameWindow(arcade.Window):
         for bullet in self.bullet_sprites_list:
             hit2 = arcade.check_for_collision_with_list(bullet,self.enemy_sprites_list)
             if len(hit2)!=0:
-                if self.lifesteal == True:
+                if self.lifesteal == True and bullet.type == 0:
                     self.hp+=self.leechamount
                 bullet.kill()
             for enemy in hit2:
                 if enemy.type == 'General Prayeth':
                     enemy.hp-=1
                     self.boss_hp-=1
-                elif enemy.type == 'Thorn Tank' or enemy.type == 'Versatile Tank':
+                elif (enemy.type == 'Thorn Tank' or enemy.type == 'Versatile Tank') and bullet.type == 0:
                     self.hp-=1
                     enemy.hp-=1
                     print(enemy.type,"reflect your bullet! Hp-1")
@@ -332,6 +348,15 @@ class SpaceGameWindow(arcade.Window):
                 elif upgrade.type == 'SATANIC':
                     self.leechamount+=1
                     print("Lifessteal increased!")
+                elif upgrade.type == 'funnel':
+                    self.funnel = True
+                    print("You got some assistants")
+                    for i in range(2):
+                        funnel = Funnel("images/ship.png", SCALE*0.55)
+                        funnel.center_y = self.player_sprite.center_y
+                        funnel.center_x = self.player_sprite.center_x-self.player_sprite.width+2*self.player_sprite.width*(i)
+                        self.funnel_sprites_list.append(funnel)
+                        self.all_sprites_list.append(funnel)
                 upgrade.kill()
 
         #collision checking 4 (player vs fence)
@@ -373,13 +398,14 @@ class SpaceGameWindow(arcade.Window):
             print("Game Over!")
             print("Score =",self.score)
             print("Level reached =",self.current_lv)
-            print("Final score : (Score)+(Levelx150) =",self.score+self.current_lv*150)
+            print("Final score : (Score)+(Level-1x150) =",self.score+(self.current_lv-1)*150)
             sys.exit()
       
     def on_key_press(self, symbol, modifiers):
         def shooting(number,adjust):
             for i in range(number):
                 bullet = Bullet("images/bullet.png",SCALE*0.9)
+                bullet.type = 0 #0 = player,1 = funnel
                 bullet.center_x = self.player_sprite.center_x-(self.player_sprite.width/2*(i-1+adjust))
                 bullet.bottom = self.player_sprite.top
                 self.bullet_sprites_list.append(bullet)
