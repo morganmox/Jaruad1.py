@@ -6,7 +6,9 @@ from models import * #* = เอามาแม่งให้หมดอ่ะ
 SCREEN_WIDTH = 600
 SCREEN_HEIGHT = 600
 SCALE = 1
+        
 class SpaceGameWindow(arcade.Window):
+        
     def __init__(self, width, height):
         super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT)
         #bg setting,framecount
@@ -50,18 +52,19 @@ class SpaceGameWindow(arcade.Window):
         self.lv8 = False
         self.lv9 = False
         self.lv10 = False
+        self.lv11 = False
         #create all sprite array
         self.all_sprites_list = arcade.SpriteList() # for drawing
         self.bullet_sprites_list = arcade.SpriteList() # player bullet
         self.enemy_sprites_list = arcade.SpriteList() #enemy
         self.enemy_bullet_sprites_list = arcade.SpriteList() #enemy bullet
-        self.fence_sprites_list = arcade.SpriteList()
+        self.fence_sprites_list = arcade.SpriteList() #fence
         self.upgrade_sprites_list = arcade.SpriteList() # upgrades
         #giving birth to player
         self.player_sprite = Ship("images/ship.png", SCALE*0.95)
         self.all_sprites_list.append(self.player_sprite)
         print("Game start with Hp =",self.hp)
-
+        
     def on_draw(self):
         #simply draw everything
         arcade.start_render()
@@ -81,7 +84,7 @@ class SpaceGameWindow(arcade.Window):
             output3 = f"General Prayeth : {self.boss_hp}"
             if not self.boss_hp_text or output3 != self.boss_hp_text.text:
                 self.boss_hp_text = arcade.create_text(output3, arcade.color.RED, 17)
-            arcade.render_text(self.boss_hp_text, SCREEN_WIDTH*17/25, SCREEN_HEIGHT/25)
+            arcade.render_text(self.boss_hp_text, SCREEN_WIDTH*16.5/25, SCREEN_HEIGHT/25)
         #current level
         output4 = f"Level : {self.current_lv}"
         if not self.current_lv_text or output4 != self.current_lv_text.text:
@@ -89,6 +92,86 @@ class SpaceGameWindow(arcade.Window):
         arcade.render_text(self.current_lv_text, SCREEN_WIDTH/25, SCREEN_HEIGHT*2.44/25)
 
     def update(self,x):
+        def spawnenemy(typed,hp,damage,worth):
+            if typed == 'Vanilla Tank':
+                enemy = Enemy("images/enemy.png", SCALE)
+            elif  typed == 'Submarine':
+                enemy = EnemySubmarine("images/enemysub.png", SCALE)
+            elif typed == 'Kamikaze':
+                enemy = EnemyAirforce("images/enemyair.png", SCALE*1.1)
+                if enemy.center_x> SCREEN_WIDTH/2:
+                    enemy.angle = 180
+            elif typed == 'Elite Tank':
+                enemy = EnemyRed("images/enemyred.png", SCALE)
+            elif typed == 'General Prayeth':
+                self.BOSS = True
+                self.bossspawned = True
+                print("BOSS incoming! General Prayeth (hp:100,weapon:nuclear,subweapon:pistol)")
+                enemy = BOSS("images/prayed.png", SCALE)
+            elif typed == 'nuclear':
+                enemy = Redbullet("images/nuclear.png",SCALE)
+                enemy.center_x = random.randrange(SCREEN_WIDTH-30)+30
+                enemy.center_y = SCREEN_HEIGHT
+            elif typed == 'Thorn Tank':
+                enemy = EnemyBlue("images/enemyblue.png", SCALE)
+                if enemy.center_y < SCREEN_HEIGHT/2:
+                    enemy.angle = 180
+            elif typed == 'Ghost Plane':
+                enemy = Stealth("images/ghost.png", SCALE)
+                enemy.unknown = True
+            elif typed == 'F-22 Falcon':
+                enemy = Falcon("images/Falcon.png", SCALE)
+                enemy.soulripped = False
+            elif typed == 'Plague Tank':
+                enemy = Enemy("images/enemyplague.png",SCALE)
+            elif typed == 'Xhamster':
+                enemy = Hamtaro("images/hamtaro.png",SCALE)
+            enemy.type = typed
+            enemy.hp = hp
+            enemy.damage = damage
+            enemy.worth = worth
+            self.enemy_sprites_list.append(enemy)
+            self.all_sprites_list.append(enemy)
+            
+        def shooting(number,adjust):
+            for i in range(number):
+                bullet = Bullet("images/bullet.png",SCALE*0.9)
+                bullet.center_x = self.player_sprite.center_x-(self.player_sprite.width/2*(i-1+adjust))
+                bullet.bottom = self.player_sprite.top
+                self.bullet_sprites_list.append(bullet)
+                self.all_sprites_list.append(bullet)
+                
+        def enemyshoot(host,typed,damage):
+            if host == 'Elite Tank' or host == 'General Prayeth':
+                enemybullet = Redbullet("images/bulletenemy.png", SCALE*0.9)
+            elif host == 'Submarine':
+                enemybullet = Torpedo("images/torpedo.png", SCALE)
+            elif host == 'Xhamster':
+                enemybullet = Seed("images/shit.png", SCALE*0.9)
+            elif host == 'F-22 Falcon':#unique (2 bullets)
+                for i in range(2):
+                    enemybullet = Falconbullet("images/falconbullet.png",SCALE*0.9)
+                    enemybullet.center_x = enemy.center_x-(enemy.width/4)+(enemy.width/2*i)
+                    enemybullet.top = enemy.bottom
+                    enemybullet.damage = damage
+                    enemybullet.type = typed
+                    self.enemy_bullet_sprites_list.append(enemybullet)
+                    self.all_sprites_list.append(enemybullet)
+            
+            if host !='F-22 Falcon':#typical (1 bullet)
+                enemybullet.center_x = enemy.center_x
+                enemybullet.top = enemy.bottom
+                enemybullet.damage = damage
+                enemybullet.type = typed
+                self.enemy_bullet_sprites_list.append(enemybullet)
+                self.all_sprites_list.append(enemybullet)
+            
+        def upgrade(typed,images):
+            upgrade = Greenfoot(images, SCALE)
+            upgrade.type = typed
+            self.upgrade_sprites_list.append(upgrade)
+            self.all_sprites_list.append(upgrade)
+            
         self.all_sprites_list.update()
         self.framecount+=1
         #update current level
@@ -110,279 +193,126 @@ class SpaceGameWindow(arcade.Window):
             self.current_lv = '9'
         elif self.bossdefeat == True and self.score>=2800 and self.score <3800:
             self.current_lv = '10'
-
-        #spawning fence
-        if self.framecount%75==0:
+        
+        if self.framecount%75==0: #spawning fence
             fence = Torpedo("images/fence.png", SCALE*1.1)
             fence.center_y = SCREEN_HEIGHT
             fence.center_x = random.randrange(SCREEN_WIDTH)+20
             self.fence_sprites_list.append(fence)
             self.all_sprites_list.append(fence)
 
-        #spawning enemy : Vanilla Tank
-        if self.framecount%12==0 and self.lv7 == False:
-            enemy = Enemy("images/enemy.png", SCALE)
-            enemy.hp = 1
-            enemy.damage = 1
-            enemy.worth = 1
-            enemy.type = 'Vanilla Tank'
-            self.enemy_sprites_list.append(enemy)
-            self.all_sprites_list.append(enemy)
+        if self.framecount%12==0 and self.lv7 == False:#spawning enemy level 1 : Vanilla Tank
+            spawnenemy('Vanilla Tank',1,1,1)
 
-        #spawning enemy level 2 :Submarine
-        if self.score>=30:
+        if self.score>=30:#spawning enemy level 2 :Submarine
             self.lv2 = True
         if self.framecount%30==0 and self.lv2 == True and self.lv8 == False:
-            enemy = EnemySubmarine("images/enemysub.png", SCALE)
-            enemy.hp = 2
-            enemy.worth = 2
-            enemy.type = 'Submarine'
-            self.enemy_sprites_list.append(enemy)
-            self.all_sprites_list.append(enemy)
+            spawnenemy('Submarine',2,0,2)
 
-        #spawning enemy level 3 : Kamikaze
-        if self.score>=100:
+        if self.score>=100:#spawning enemy level 3 : Kamikaze
             self.lv3 = True
-        if self.framecount%36==0 and self.lv3 == True:
-            enemy = EnemyAirforce("images/enemyair.png", SCALE*1.1)
-            if enemy.center_x> SCREEN_WIDTH/2:
-                enemy.angle = 180
-            enemy.hp = random.randrange(3)+3
-            enemy.damage = 0
-            enemy.worth = 3
-            enemy.type = 'Kamikaze'
-            self.enemy_sprites_list.append(enemy)
-            self.all_sprites_list.append(enemy)
+        if self.framecount%36==0 and self.lv3 == True and self.lv11!=True:
+            spawnenemy('Kamikaze',random.randrange(3)+3,0,3)
 
-        #spawning enemy level 4 : Elite Tank
-        if self.score>=300:
+        if self.score>=300:#spawning enemy level 4 : Elite Tank
             self.lv4 = True
         if self.framecount%150==0 and self.lv4 == True and self.lv10!=True:
-            enemy = EnemyRed("images/enemyred.png", SCALE)
-            enemy.hp = 9
-            enemy.damage = 2
-            enemy.worth = 5
-            enemy.type = 'Elite Tank'
-            self.enemy_sprites_list.append(enemy)
-            self.all_sprites_list.append(enemy)
+            spawnenemy('Elite Tank',9,2,5)
 
-        #spawning enemy BOSS : General Prayeth
-        if self.score>=500 and self.bossspawned == False:
-            self.BOSS = True
-            self.bossspawned = True
-            print("BOSS incoming! General Prayeth (hp:100,weapon:nuclear,subweapon:pistol)")
-            enemy = BOSS("images/prayed.png", SCALE)
-            enemy.hp = 100
-            enemy.damage = -666
-            enemy.worth = 44
-            enemy.type = 'General Prayeth'
-            self.enemy_sprites_list.append(enemy)
-            self.all_sprites_list.append(enemy)
+        if self.score>=500 and self.bossspawned == False:#spawning enemy BOSS : General Prayeth
+            spawnenemy('General Prayeth',100,-666,44)
             
-        #spawning nuclear (Boss's weapon)
-        if self.BOSS == True and self.framecount%40==0:
-            enemy = Redbullet("images/nuclear.png",SCALE)
-            enemy.center_x = random.randrange(SCREEN_WIDTH-30)+30
-            enemy.center_y = SCREEN_HEIGHT
-            enemy.hp = 6
-            enemy.damage = 3
-            enemy.worth = 0
-            enemy.type = 'nuclear'
-            self.enemy_sprites_list.append(enemy)
-            self.all_sprites_list.append(enemy)
+        if self.BOSS == True and self.framecount%40==0:#spawning nuclear (Boss's weapon)
+            spawnenemy('nuclear',6,3,0)
 
-        #spawning enemy level 6 :  Thorn Tank
-        if self.bossdefeat == True:
+        if self.bossdefeat == True:#spawning enemy level 6 :  Thorn Tank
             self.lv6 = True
         if self.framecount%180==0 and self.lv6 == True:
-            enemy = EnemyBlue("images/enemyblue.png", SCALE)
-            if enemy.center_y < SCREEN_HEIGHT/2:
-                enemy.angle = 180
-            enemy.hp = 15
-            enemy.damage = 6
-            enemy.worth = 20
-            enemy.type = 'Thorn Tank'
-            self.enemy_sprites_list.append(enemy)
-            self.all_sprites_list.append(enemy)
+            spawnenemy('Thorn Tank',15,6,20)
 
-        #spawning enemy level 7 : Ghost Plane
-        if self.score>=1000 and self.bossdefeat == True:
+        if self.score>=1000 and self.bossdefeat == True and self.lv11 != True:#spawning enemy level 7 : Ghost Plane
             self.lv7 = True
         if self.framecount%30==0 and self.lv7 == True:
-            enemy = Stealth("images/ghost.png", SCALE)
-            enemy.hp = 8
-            enemy.damage = 1
-            enemy.worth = 10
-            enemy.unknown = True
-            enemy.type = 'Ghost Plane'
-            self.enemy_sprites_list.append(enemy)
-            self.all_sprites_list.append(enemy)
+            spawnenemy('Ghost Plane',8,1,10)
 
-        #spawning enemy level 8 : F-22 Falcon
-        if self.score>=1400 and self.bossdefeat == True:
+        if self.score>=1400 and self.bossdefeat == True:#spawning enemy level 8 : F-22 Falcon
             self.lv8 = True
-        if self.framecount%45==0 and self.lv8 == True:
-            enemy = Falcon("images/Falcon.png", SCALE)
-            enemy.hp = 12
-            enemy.damage = 0
-            enemy.soulripped = False
-            enemy.worth = 20
-            enemy.type = 'F-22 Falcon'
-            self.enemy_sprites_list.append(enemy)
-            self.all_sprites_list.append(enemy)
+        if self.framecount%40==0 and self.lv8 == True:
+            spawnenemy('F-22 Falcon',12,0,20)
 
-        #spawning enemy level 9 : Plague Tank
-        if self.score>=2000 and self.bossdefeat == True:
+        if self.score>=2000 and self.bossdefeat == True:#spawning enemy level 9 : Plague Tank
             self.lv9 = True
         if self.framecount%25==0 and self.lv9 == True:
-            enemy = Enemy("images/enemyplague.png",SCALE)
-            enemy.hp = 10
-            enemy.damage = 10
-            enemy.worth = 10
-            enemy.type = 'Plague Tank'
-            self.enemy_sprites_list.append(enemy)
-            self.all_sprites_list.append(enemy)
+            spawnenemy('Plague Tank',10,10,10)
         if self.framecount%21==0 and self.lv9 == True:#curse dps
             self.hp-=self.curse
             print("You are cursed! Hp-",self.curse)
             self.curse = 0
 
-        #spawning enemy level 10 : Xhamster
-        if self.score>=2800 and self.bossdefeat == True:
+        if self.score>=2800 and self.bossdefeat == True:#spawning enemy level 10 : Xhamster
             self.lv10 = True
         if self.framecount%180==0 and self.lv10 == True:
-            enemy = Hamtaro("images/hamtaro.png",SCALE)
-            enemy.hp = 30
-            enemy.damage = 5
-            enemy.worth = 30
-            enemy.type = 'Xhamster'
-            self.enemy_sprites_list.append(enemy)
-            self.all_sprites_list.append(enemy)
+            spawnenemy('Xhamster',30,5,30)
 
-        #bullet from enemies
-        for enemy in self.enemy_sprites_list:
+        if self.score>=3800:# kid mai ogg
+            self.lv11 = True
+        if self.framecount%15==0 and self.lv11 == True:
+            print("out of idea")
+
+        for enemy in self.enemy_sprites_list:#armed enemies
             if enemy.type == 'Elite Tank':
                 if self.framecount%40==0:
-                    enemybullet = Redbullet("images/bulletenemy.png", SCALE*0.9)
-                    enemybullet.center_x = enemy.center_x
-                    enemybullet.top = enemy.bottom
-                    enemybullet.damage = 1
-                    enemybullet.type = 'Bullet'
-                    self.enemy_bullet_sprites_list.append(enemybullet)
-                    self.all_sprites_list.append(enemybullet)
+                    enemyshoot('Elite Tank','Bullet',1)
             elif enemy.type == 'Submarine':
                 if random.randrange(100)<2:
-                    enemybullet = Torpedo("images/torpedo.png", SCALE)
-                    enemybullet.center_x = enemy.center_x
-                    enemybullet.top = enemy.bottom
-                    enemybullet.damage = 1
-                    enemybullet.type = 'Torpedo'
-                    self.enemy_bullet_sprites_list.append(enemybullet)
-                    self.all_sprites_list.append(enemybullet)
+                    enemyshoot('Submarine','Torpedo',1)
             elif enemy.type == 'General Prayeth':
                 if self.framecount%25==0:
-                    enemybullet = Redbullet("images/bulletenemy.png", SCALE*0.9)
-                    enemybullet.center_x = enemy.center_x
-                    enemybullet.top = enemy.bottom
-                    enemybullet.damage = 2
-                    enemybullet.type = 'Pistol'
-                    self.enemy_bullet_sprites_list.append(enemybullet)
-                    self.all_sprites_list.append(enemybullet)
+                    enemyshoot('General Prayeth','Pistol',2)
             elif enemy.type == 'F-22 Falcon':
                 if self.framecount%20==0:
-                    for i in range(2):
-                        enemybullet = Falconbullet("images/falconbullet.png",SCALE*0.9)
-                        enemybullet.center_x = enemy.center_x-(enemy.width/4)+(enemy.width/2*i)
-                        enemybullet.top = enemy.bottom
-                        enemybullet.damage = 0
-                        enemybullet.type = 'Ruin king'
-                        self.enemy_bullet_sprites_list.append(enemybullet)
-                        self.all_sprites_list.append(enemybullet)
+                    enemyshoot('F-22 Falcon','Ruin king',1)
             elif enemy.type == 'Plague Tank':
                 if self.framecount%21==0:
                     self.curse+=1
             elif enemy.type == 'Xhamster':
                 if self.framecount%21==0:
-                    enemybullet = Seed("images/shit.png", SCALE*0.9)
-                    enemybullet.center_x = enemy.center_x
-                    enemybullet.top = enemy.bottom
-                    enemybullet.damage = 2
-                    enemybullet.type = 'Hamster shit'
-                    self.enemy_bullet_sprites_list.append(enemybullet)
-                    self.all_sprites_list.append(enemybullet)
+                    enemyshoot('Xhamster','Hamster shit',2)
 
-        #automatic shooting
-        if self.automatic == True:
+        if self.automatic == True:#automatic shooting
             if self.framecount%self.firedelay==0:
                 if self.multigun == True:#upgrade
-                    for i in range(3):
-                        bullet = Bullet("images/bullet.png",SCALE*0.9)
-                        bullet.center_x = self.player_sprite.center_x-(self.player_sprite.width/2*(i-1))
-                        bullet.bottom = self.player_sprite.top
-                        self.bullet_sprites_list.append(bullet)
-                        self.all_sprites_list.append(bullet)
+                    shooting(3,0)
                 else :#no upgrade
-                    bullet = Bullet("images/bullet.png",SCALE)
-                    bullet.center_x = self.player_sprite.center_x
-                    bullet.bottom = self.player_sprite.top
-                    self.bullet_sprites_list.append(bullet)
-                    self.all_sprites_list.append(bullet)
+                    shooting(1,1)
 
-        #speedup upgrade deployed
         if self.score>= 20 and self.speeddropped == False:
-            self.speeddropped = True
-            upgrade = Greenfoot("images/greenfoot.png", SCALE)
-            upgrade.type = 'Speed'
-            self.upgrade_sprites_list.append(upgrade)
-            self.all_sprites_list.append(upgrade)
+            self.speeddropped = True #speedup upgrade deployed
+            upgrade('Speed',"images/greenfoot.png")
  
-        #multigun upgrade deployed
         if self.score>= 80 and self.gundropped == False:
-            self.gundropped = True
-            upgrade = Greenfoot("images/d.png", SCALE)
-            upgrade.type = 'Multi'
-            self.upgrade_sprites_list.append(upgrade)
-            self.all_sprites_list.append(upgrade)
+            self.gundropped = True #multigun upgrade deployed
+            upgrade('Multi',"images/d.png")
 
-        #automatic upgrade deployed
         if self.score>=40 and self.autodropped == False:
-            self.autodropped = True
-            upgrade = Greenfoot("images/d2.png",SCALE)
-            upgrade.type = 'Auto'
-            self.upgrade_sprites_list.append(upgrade)
-            self.all_sprites_list.append(upgrade)
+            self.autodropped = True #automatic upgrade deployed
+            upgrade('Auto',"images/d2.png")
 
-        #heal deployed after boss defeated
         if self.bossdefeat == True and self.healdropped == False:
-            self.healdropped = True
-            upgrade = Greenfoot("images/d3.png",SCALE)
-            upgrade.type = 'Heal'
-            self.upgrade_sprites_list.append(upgrade)
-            self.all_sprites_list.append(upgrade)
+            self.healdropped = True #heal deployed after boss defeated
+            upgrade('Heal',"images/d3.png")
 
-        #heal deployed randomly after level 9
-        if self.lv9 == True:
+        if self.lv9 == True: #heal deployed randomly after level 9
             if random.randrange(250)==0:
-                upgrade = Greenfoot("images/d3.png",SCALE)
-                upgrade.type = 'Heal'
-                self.upgrade_sprites_list.append(upgrade)
-                self.all_sprites_list.append(upgrade)
+                upgrade('Heal',"images/d3.png")
 
-        #lifesteal deployed after level 8
         if self.lv8 == True and self.lifestealdropped == False:
-            self.lifestealdropped = True
-            upgrade = Greenfoot("images/d4.png",SCALE)
-            upgrade.type = 'Lifesteal'
-            self.upgrade_sprites_list.append(upgrade)
-            self.all_sprites_list.append(upgrade)
+            self.lifestealdropped = True #lifesteal deployed after level 8
+            upgrade('Lifesteal',"images/d4.png")
             
-        #score>=2500 = deployed rapidfire
         if self.score>=2500 and self.rapiddropped == False:
-            self.rapiddropped = True
-            upgrade = Greenfoot("images/d5.png",SCALE)
-            upgrade.type = 'Gatling'
-            self.upgrade_sprites_list.append(upgrade)
-            self.all_sprites_list.append(upgrade)   
+            self.rapiddropped = True #rapidfire deployed after score>=2500
+            upgrade('Gatling',"images/d5.png")   
 
         #collision checking (enemies vs player)       
         hit = arcade.check_for_collision_with_list(self.player_sprite,self.enemy_sprites_list)
@@ -487,16 +417,16 @@ class SpaceGameWindow(arcade.Window):
         if len(hit5)!=0:
             for enemybullet in hit5:
                 if enemybullet.type == 'Ruin king':
-                    self.hp = int(self.hp*96/100)
-                    print("Got hit by Falcon's bullet! hp-4%")
+                    self.hp = int(self.hp*96/100)-enemybullet.damage
+                    print("Got hit by Falcon's bullet! hp-4% in addition.")
                 elif enemybullet.type == 'Hamster shit':
                     if random.randrange(100)>5:
                         self.hp-=enemybullet.damage
                         self.score-=1
                         print("Hamster's shit makes you sick! hp-2, score-1")
                     else:
-                        self.hp = int(self.hp*9/10)
-                        print("Critical shit! hp-10%")
+                        self.hp = int(self.hp*9/10)-enemybullet.damage
+                        print("Critical shit! hp-10% in addition.")
                 else:
                     self.hp-=enemybullet.damage
                     print("Got hit by",enemybullet.type,"! hp-",enemybullet.damage)
@@ -515,23 +445,21 @@ class SpaceGameWindow(arcade.Window):
             elif self.BOSS == False and self.bossspawned == True:
                 print("You win! Thanks for playing. :D")
             sys.exit()
-            
+      
     def on_key_press(self, symbol, modifiers):
-        #pew pew
-        if symbol == arcade.key.SPACE and self.automatic == False:
-            if self.multigun == True:#upgrade
-                for i in range(3):
-                    bullet = Bullet("images/bullet.png",SCALE*0.9)
-                    bullet.center_x = self.player_sprite.center_x-(self.player_sprite.width/2*(i-1))
-                    bullet.bottom = self.player_sprite.top
-                    self.bullet_sprites_list.append(bullet)
-                    self.all_sprites_list.append(bullet)
-            else :#no upgrade
-                bullet = Bullet("images/bullet.png",SCALE)
-                bullet.center_x = self.player_sprite.center_x
+        def shooting(number,adjust):
+            for i in range(number):
+                bullet = Bullet("images/bullet.png",SCALE*0.9)
+                bullet.center_x = self.player_sprite.center_x-(self.player_sprite.width/2*(i-1+adjust))
                 bullet.bottom = self.player_sprite.top
                 self.bullet_sprites_list.append(bullet)
                 self.all_sprites_list.append(bullet)
+        #pew pew
+        if symbol == arcade.key.SPACE and self.automatic == False:
+            if self.multigun == True:#upgrade
+                shooting(3,0)
+            else :#no upgrade
+                shooting(1,1)
         #moving
         if symbol == arcade.key.LEFT:
             self.player_sprite.vx = -1-self.speedup
@@ -546,8 +474,8 @@ class SpaceGameWindow(arcade.Window):
         if symbol == arcade.key.LEFT or symbol == arcade.key.RIGHT:
             self.player_sprite.vx = 0
         elif symbol == arcade.key.UP or symbol == arcade.key.DOWN:
-            self.player_sprite.vy = 0          
- 
+            self.player_sprite.vy = 0
+     
 if __name__ == '__main__':
     window = SpaceGameWindow(SCREEN_WIDTH, SCREEN_HEIGHT)
     arcade.run()
