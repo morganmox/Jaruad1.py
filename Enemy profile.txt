@@ -71,7 +71,7 @@
 -score worth = 20
 -collision damage = Player's hp/2
 *Player's hp<=50 = Instant kill.
--weapon = 2 X Ruin king (speed = 18,damage = 4%hp)
+-weapon = 2 X Ruin king (speed = 18,damage = 1+4%hp)
 -not destroy on collision.
 
 9.Plague tank (score = 2000)
@@ -88,4 +88,12 @@
 -speed = 1
 -score worth = 30
 -collision damage = 5
--weapon = Hamster's shit (speed = x:6 y:4, damage = 2, score -1,*5% critical damage => 10%hp)
+-weapon = Hamster's shit (speed = x:6 y:4, damage = 2, score -1,*5% critical damage => +10%hp)
+
+11.Versatile Tank (score = 3800)
+-LV = 11
+-hp = 25
+-speed = 5-9
+-score worth = 25
+-collision damage = 5
+-weapon = 1.Bullet (speed = 2++,damage = 4) 2.Thorn (reflect damage)

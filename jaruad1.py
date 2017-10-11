@@ -1,14 +1,12 @@
 import arcade
 import random
 import sys
-from models import * #* = เอามาแม่งให้หมดอ่ะ
+from models import *
 #ตรงนี้อย่าซน
 SCREEN_WIDTH = 600
 SCREEN_HEIGHT = 600
-SCALE = 1
-        
+SCALE = 1      
 class SpaceGameWindow(arcade.Window):
-        
     def __init__(self, width, height):
         super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT)
         #bg setting,framecount
@@ -25,10 +23,10 @@ class SpaceGameWindow(arcade.Window):
         self.current_lv_text = None
         self.gameover = False
         self.curse = 0
-        self.firedelay = 7
         self.fenceproof = True
         #upgrade status
         self.speedup = 0
+        self.firedelay = 7
         self.multigun = False
         self.automatic = False
         self.lifesteal = False
@@ -53,40 +51,35 @@ class SpaceGameWindow(arcade.Window):
         self.lv9 = False
         self.lv10 = False
         self.lv11 = False
-        #create all sprite array
-        self.all_sprites_list = arcade.SpriteList() # for drawing
-        self.bullet_sprites_list = arcade.SpriteList() # player bullet
+        #สร้างที่เก็บของแต่ละอย่างไว้ check collision
+        self.all_sprites_list = arcade.SpriteList() #เก็บทุกอย่างไว้สั่งวาดทุกอย่างในคำสั่งเดียว
+        self.bullet_sprites_list = arcade.SpriteList() #player bullet
         self.enemy_sprites_list = arcade.SpriteList() #enemy
         self.enemy_bullet_sprites_list = arcade.SpriteList() #enemy bullet
         self.fence_sprites_list = arcade.SpriteList() #fence
-        self.upgrade_sprites_list = arcade.SpriteList() # upgrades
-        #giving birth to player
-        self.player_sprite = Ship("images/ship.png", SCALE*0.95)
-        self.all_sprites_list.append(self.player_sprite)
+        self.upgrade_sprites_list = arcade.SpriteList() #upgrades
+        self.player_sprite = Ship("images/ship.png", SCALE*0.95) #spawn ตัวคนเล่น
+        self.all_sprites_list.append(self.player_sprite) #ยัดตัวคนเล่นเข้าไปใน list ที่จะวาด
         print("Game start with Hp =",self.hp)
         
     def on_draw(self):
-        #simply draw everything
         arcade.start_render()
-        self.all_sprites_list.draw()
-        #scoreboard
-        output = f"Score : {self.score}"
+        self.all_sprites_list.draw()#วาดทุกอย่างที่สร้าง
+        
+        output = f"Score : {self.score}"#scoreboard
         if not self.score_text or output != self.score_text.text:
             self.score_text = arcade.create_text(output, arcade.color.WHITE, 17)
         arcade.render_text(self.score_text, SCREEN_WIDTH/25, SCREEN_HEIGHT*1.72/25)
-        #hp
-        output2 = f"Player's HP : {self.hp}"
+        output2 = f"Player's HP : {self.hp}"#hp
         if not self.hp_text or output2 != self.hp_text.text:
             self.hp_text = arcade.create_text(output2, arcade.color.WHITE, 17)
         arcade.render_text(self.hp_text, SCREEN_WIDTH/25, SCREEN_HEIGHT/25)
-        #bosshp
-        if self.BOSS == True:
+        if self.BOSS == True:#bosshp
             output3 = f"General Prayeth : {self.boss_hp}"
             if not self.boss_hp_text or output3 != self.boss_hp_text.text:
                 self.boss_hp_text = arcade.create_text(output3, arcade.color.RED, 17)
             arcade.render_text(self.boss_hp_text, SCREEN_WIDTH*16.5/25, SCREEN_HEIGHT/25)
-        #current level
-        output4 = f"Level : {self.current_lv}"
+        output4 = f"Level : {self.current_lv}"#level ปัจจุบัน
         if not self.current_lv_text or output4 != self.current_lv_text.text:
             self.current_lv_text = arcade.create_text(output4, arcade.color.WHITE, 17)
         arcade.render_text(self.current_lv_text, SCREEN_WIDTH/25, SCREEN_HEIGHT*2.44/25)
@@ -126,6 +119,10 @@ class SpaceGameWindow(arcade.Window):
                 enemy = Enemy("images/enemyplague.png",SCALE)
             elif typed == 'Xhamster':
                 enemy = Hamtaro("images/hamtaro.png",SCALE)
+            elif typed == 'Versatile Tank':
+                enemy = Enemy("images/enemyorange.png",SCALE)
+            else:
+                print("ERROR : Model not found.")
             enemy.type = typed
             enemy.hp = hp
             enemy.damage = damage
@@ -142,7 +139,7 @@ class SpaceGameWindow(arcade.Window):
                 self.all_sprites_list.append(bullet)
                 
         def enemyshoot(host,typed,damage):
-            if host == 'Elite Tank' or host == 'General Prayeth':
+            if host == 'Elite Tank' or host == 'General Prayeth' or host == 'Versatile Tank':
                 enemybullet = Redbullet("images/bulletenemy.png", SCALE*0.9)
             elif host == 'Submarine':
                 enemybullet = Torpedo("images/torpedo.png", SCALE)
@@ -174,7 +171,8 @@ class SpaceGameWindow(arcade.Window):
             
         self.all_sprites_list.update()
         self.framecount+=1
-        #update current level
+        
+        #update level ปัจจุบัน(ตรงนี้รกไปหน่อย)
         if self.score>=30 and self.score <100:
             self.current_lv = '2'
         elif self.score>=100 and self.score <300:
@@ -193,54 +191,56 @@ class SpaceGameWindow(arcade.Window):
             self.current_lv = '9'
         elif self.bossdefeat == True and self.score>=2800 and self.score <3800:
             self.current_lv = '10'
+        elif self.bossdefeat == True and self.score>=3800 and self.score <4500:
+            self.current_lv = '11'
         
-        if self.framecount%75==0: #spawning fence
+        if self.framecount%75==0: #รั้วลวดหนาม
             fence = Torpedo("images/fence.png", SCALE*1.1)
             fence.center_y = SCREEN_HEIGHT
             fence.center_x = random.randrange(SCREEN_WIDTH)+20
             self.fence_sprites_list.append(fence)
             self.all_sprites_list.append(fence)
 
-        if self.framecount%12==0 and self.lv7 == False:#spawning enemy level 1 : Vanilla Tank
+        if self.framecount%12==0 and self.lv7 == False:#level 1
             spawnenemy('Vanilla Tank',1,1,1)
 
-        if self.score>=30:#spawning enemy level 2 :Submarine
+        if self.score>=30:#level 2
             self.lv2 = True
         if self.framecount%30==0 and self.lv2 == True and self.lv8 == False:
             spawnenemy('Submarine',2,0,2)
 
-        if self.score>=100:#spawning enemy level 3 : Kamikaze
+        if self.score>=100:#level 3
             self.lv3 = True
         if self.framecount%36==0 and self.lv3 == True and self.lv11!=True:
             spawnenemy('Kamikaze',random.randrange(3)+3,0,3)
 
-        if self.score>=300:#spawning enemy level 4 : Elite Tank
+        if self.score>=300:#level 4
             self.lv4 = True
         if self.framecount%150==0 and self.lv4 == True and self.lv10!=True:
             spawnenemy('Elite Tank',9,2,5)
 
-        if self.score>=500 and self.bossspawned == False:#spawning enemy BOSS : General Prayeth
+        if self.score>=500 and self.bossspawned == False:#BOSS
             spawnenemy('General Prayeth',100,-666,44)
             
-        if self.BOSS == True and self.framecount%40==0:#spawning nuclear (Boss's weapon)
+        if self.BOSS == True and self.framecount%40==0:#nuclear (Boss's weapon)
             spawnenemy('nuclear',6,3,0)
 
-        if self.bossdefeat == True:#spawning enemy level 6 :  Thorn Tank
+        if self.bossdefeat == True:#level 6
             self.lv6 = True
         if self.framecount%180==0 and self.lv6 == True:
             spawnenemy('Thorn Tank',15,6,20)
 
-        if self.score>=1000 and self.bossdefeat == True and self.lv11 != True:#spawning enemy level 7 : Ghost Plane
+        if self.score>=1000 and self.bossdefeat == True and self.lv11 != True:#level 7
             self.lv7 = True
         if self.framecount%30==0 and self.lv7 == True:
             spawnenemy('Ghost Plane',8,1,10)
 
-        if self.score>=1400 and self.bossdefeat == True:#spawning enemy level 8 : F-22 Falcon
+        if self.score>=1400 and self.bossdefeat == True:#level 8
             self.lv8 = True
         if self.framecount%40==0 and self.lv8 == True:
             spawnenemy('F-22 Falcon',12,0,20)
 
-        if self.score>=2000 and self.bossdefeat == True:#spawning enemy level 9 : Plague Tank
+        if self.score>=2000 and self.bossdefeat == True:#level 9
             self.lv9 = True
         if self.framecount%25==0 and self.lv9 == True:
             spawnenemy('Plague Tank',10,10,10)
@@ -249,17 +249,18 @@ class SpaceGameWindow(arcade.Window):
             print("You are cursed! Hp-",self.curse)
             self.curse = 0
 
-        if self.score>=2800 and self.bossdefeat == True:#spawning enemy level 10 : Xhamster
+        if self.score>=2800 and self.bossdefeat == True:#level 10
             self.lv10 = True
         if self.framecount%180==0 and self.lv10 == True:
             spawnenemy('Xhamster',30,5,30)
 
-        if self.score>=3800:# kid mai ogg
+        if self.score>=3800:#level 11
             self.lv11 = True
-        if self.framecount%15==0 and self.lv11 == True:
-            print("out of idea")
-
-        for enemy in self.enemy_sprites_list:#armed enemies
+        if self.framecount%20==0 and self.lv11 == True:
+            spawnenemy('Versatile Tank',15,5,25)
+        #spawnenemy(ชื่อ,hp,damage เวลาชน,คะแนนที่ได้เวลาฆ่า)
+            
+        for enemy in self.enemy_sprites_list:#ศัตรูตัวที่ยิงได้
             if enemy.type == 'Elite Tank':
                 if self.framecount%40==0:
                     enemyshoot('Elite Tank','Bullet',1)
@@ -278,10 +279,14 @@ class SpaceGameWindow(arcade.Window):
             elif enemy.type == 'Xhamster':
                 if self.framecount%21==0:
                     enemyshoot('Xhamster','Hamster shit',2)
+            elif enemy.type == 'Versatile Tank':
+                if self.framecount%30==0:
+                    enemyshoot('Versatile Tank','Bullet',4)
+        #enemyshoot(ชื่อคนยิง,ชื่อกระสุน,damage ตอนโดน)
 
-        if self.automatic == True:#automatic shooting
+        if self.automatic == True:#เปิดยิง auto
             if self.framecount%self.firedelay==0:
-                if self.multigun == True:#upgrade
+                if self.multigun == True:#เปิดยิง 3 ลูก
                     shooting(3,0)
                 else :#no upgrade
                     shooting(1,1)
@@ -350,17 +355,17 @@ class SpaceGameWindow(arcade.Window):
         for bullet in self.bullet_sprites_list:
             hit2 = arcade.check_for_collision_with_list(bullet,self.enemy_sprites_list)
             if len(hit2)!=0:
-                bullet.kill()
                 if self.lifesteal == True:
-                    self.hp+=1   
+                    self.hp+=1
+                bullet.kill()
             for enemy in hit2:
                 if enemy.type == 'General Prayeth':
                     enemy.hp-=1
                     self.boss_hp-=1
-                elif enemy.type == 'Thorn Tank':
+                elif enemy.type == 'Thorn Tank' or enemy.type == 'Versatile Tank':
                     self.hp-=1
                     enemy.hp-=1
-                    print("Thorn tank reflect your bullet! Hp-1")
+                    print(enemy.type,"reflect your bullet! Hp-1")
                 elif enemy.type == 'Ghost Plane':
                     if enemy.unknown == True:
                         enemy.unknown = False
@@ -393,7 +398,8 @@ class SpaceGameWindow(arcade.Window):
                     self.lifesteal = True
                     print("Lifesteal activated!")
                 elif upgrade.type == 'Gatling':
-                    self.firedelay-=2
+                    if self.firedelay>1:
+                        self.firedelay-=2
                     print("Firerate increased!")
                 elif upgrade.type == 'Heal':
                     self.hp +=250
@@ -456,11 +462,11 @@ class SpaceGameWindow(arcade.Window):
                 self.all_sprites_list.append(bullet)
         #pew pew
         if symbol == arcade.key.SPACE and self.automatic == False:
-            if self.multigun == True:#upgrade
+            if self.multigun == True:#เปิดยิง 3 ลูก
                 shooting(3,0)
             else :#no upgrade
                 shooting(1,1)
-        #moving
+        #เดิน
         if symbol == arcade.key.LEFT:
             self.player_sprite.vx = -1-self.speedup
         if symbol == arcade.key.RIGHT:
@@ -470,7 +476,7 @@ class SpaceGameWindow(arcade.Window):
         if symbol == arcade.key.DOWN:
             self.player_sprite.vy = -1-self.speedup         
     def on_key_release(self, symbol, modifiers):
-        #stop moving
+        #หยุดเดิน
         if symbol == arcade.key.LEFT or symbol == arcade.key.RIGHT:
             self.player_sprite.vx = 0
         elif symbol == arcade.key.UP or symbol == arcade.key.DOWN:
