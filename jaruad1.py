@@ -16,10 +16,11 @@ class SpaceGameWindow(arcade.Window):
         self.hp = 200
         self.score = 0
         self.score_text = None
+        self.score_list = [30,100,300,500,1000,1400,2000,2800,3800,10000000]
         self.hp_text = None
         self.boss_hp = 100
         self.boss_hp_text = None
-        self.current_lv = '1'
+        self.current_lv = 1
         self.current_lv_text = None
         self.gameover = False
         self.curse = 0
@@ -40,17 +41,7 @@ class SpaceGameWindow(arcade.Window):
         #boss status
         self.bossspawned = False
         self.bossdefeat = False
-        #Level
-        self.lv2 = False
-        self.lv3 = False
-        self.lv4 = False
         self.BOSS = False
-        self.lv6 = False
-        self.lv7 = False
-        self.lv8 = False
-        self.lv9 = False
-        self.lv10 = False
-        self.lv11 = False
         #สร้างที่เก็บของแต่ละอย่างไว้ check collision
         self.all_sprites_list = arcade.SpriteList() #เก็บทุกอย่างไว้สั่งวาดทุกอย่างในคำสั่งเดียว
         self.bullet_sprites_list = arcade.SpriteList() #player bullet
@@ -65,7 +56,6 @@ class SpaceGameWindow(arcade.Window):
     def on_draw(self):
         arcade.start_render()
         self.all_sprites_list.draw()#วาดทุกอย่างที่สร้าง
-        
         output = f"Score : {self.score}"#scoreboard
         if not self.score_text or output != self.score_text.text:
             self.score_text = arcade.create_text(output, arcade.color.WHITE, 17)
@@ -92,13 +82,10 @@ class SpaceGameWindow(arcade.Window):
                 enemy = EnemySubmarine("images/enemysub.png", SCALE)
             elif typed == 'Kamikaze':
                 enemy = EnemyAirforce("images/enemyair.png", SCALE*1.1)
-                if enemy.center_x> SCREEN_WIDTH/2:
-                    enemy.angle = 180
             elif typed == 'Elite Tank':
                 enemy = EnemyRed("images/enemyred.png", SCALE)
             elif typed == 'General Prayeth':
                 self.BOSS = True
-                self.bossspawned = True
                 print("BOSS incoming! General Prayeth (hp:100,weapon:nuclear,subweapon:pistol)")
                 enemy = BOSS("images/prayed.png", SCALE)
             elif typed == 'nuclear':
@@ -107,8 +94,6 @@ class SpaceGameWindow(arcade.Window):
                 enemy.center_y = SCREEN_HEIGHT
             elif typed == 'Thorn Tank':
                 enemy = EnemyBlue("images/enemyblue.png", SCALE)
-                if enemy.center_y < SCREEN_HEIGHT/2:
-                    enemy.angle = 180
             elif typed == 'Ghost Plane':
                 enemy = Stealth("images/ghost.png", SCALE)
                 enemy.unknown = True
@@ -153,8 +138,7 @@ class SpaceGameWindow(arcade.Window):
                     enemybullet.damage = damage
                     enemybullet.type = typed
                     self.enemy_bullet_sprites_list.append(enemybullet)
-                    self.all_sprites_list.append(enemybullet)
-            
+                    self.all_sprites_list.append(enemybullet)        
             if host !='F-22 Falcon':#typical (1 bullet)
                 enemybullet.center_x = enemy.center_x
                 enemybullet.top = enemy.bottom
@@ -172,27 +156,9 @@ class SpaceGameWindow(arcade.Window):
         self.all_sprites_list.update()
         self.framecount+=1
         
-        #update level ปัจจุบัน(ตรงนี้รกไปหน่อย)
-        if self.score>=30 and self.score <100:
-            self.current_lv = '2'
-        elif self.score>=100 and self.score <300:
-            self.current_lv = '3'
-        elif self.score>=300 and self.score <500:
-            self.current_lv = '4'
-        elif self.score>=500 and self.bossdefeat == False:
-            self.current_lv = '5 (BOSS)'
-        elif self.bossdefeat == True and self.score <1000:
-            self.current_lv = '6'
-        elif self.bossdefeat == True and self.score >=1000 and self.score <1400:
-            self.current_lv = '7'
-        elif self.bossdefeat == True and self.score>=1400 and self.score <2000:
-            self.current_lv = '8'
-        elif self.bossdefeat == True and self.score>=2000 and self.score <2800:
-            self.current_lv = '9'
-        elif self.bossdefeat == True and self.score>=2800 and self.score <3800:
-            self.current_lv = '10'
-        elif self.bossdefeat == True and self.score>=3800 and self.score <4500:
-            self.current_lv = '11'
+        if self.score>=self.score_list[0]:#levelup
+            self.score_list.pop(0)
+            self.current_lv+=1
         
         if self.framecount%75==0: #รั้วลวดหนาม
             fence = Torpedo("images/fence.png", SCALE*1.1)
@@ -201,62 +167,34 @@ class SpaceGameWindow(arcade.Window):
             self.fence_sprites_list.append(fence)
             self.all_sprites_list.append(fence)
 
-        if self.framecount%12==0 and self.lv7 == False:#level 1
+        if self.framecount%12==0 and self.current_lv<=6:#level 1-6
             spawnenemy('Vanilla Tank',1,1,1)
-
-        if self.score>=30:#level 2
-            self.lv2 = True
-        if self.framecount%30==0 and self.lv2 == True and self.lv8 == False:
+        if self.framecount%30==0 and self.current_lv>=2 and self.current_lv<=7:#level 2-7
             spawnenemy('Submarine',2,0,2)
-
-        if self.score>=100:#level 3
-            self.lv3 = True
-        if self.framecount%36==0 and self.lv3 == True and self.lv11!=True:
+        if self.framecount%36==0 and self.current_lv>=3 and self.current_lv<=10:#level 3-10
             spawnenemy('Kamikaze',random.randrange(3)+3,0,3)
-
-        if self.score>=300:#level 4
-            self.lv4 = True
-        if self.framecount%150==0 and self.lv4 == True and self.lv10!=True:
+        if self.framecount%150==0 and self.current_lv>=4 and self.current_lv<=9:#level 4-9
             spawnenemy('Elite Tank',9,2,5)
-
-        if self.score>=500 and self.bossspawned == False:#BOSS
+        if self.current_lv>=5 and self.bossspawned == False:#BOSS
+            self.bossspawned = True
             spawnenemy('General Prayeth',100,-666,44)
-            
-        if self.BOSS == True and self.framecount%40==0:#nuclear (Boss's weapon)
+        if self.BOSS == True and self.framecount%40==0:#Boss's weapon
             spawnenemy('nuclear',6,3,0)
-
-        if self.bossdefeat == True:#level 6
-            self.lv6 = True
-        if self.framecount%180==0 and self.lv6 == True:
+        if self.framecount%180==0 and self.current_lv>=6 and self.bossdefeat == True:
             spawnenemy('Thorn Tank',15,6,20)
-
-        if self.score>=1000 and self.bossdefeat == True and self.lv11 != True:#level 7
-            self.lv7 = True
-        if self.framecount%30==0 and self.lv7 == True:
+        if self.framecount%30==0 and self.current_lv>=7 and self.bossdefeat == True:
             spawnenemy('Ghost Plane',8,1,10)
-
-        if self.score>=1400 and self.bossdefeat == True:#level 8
-            self.lv8 = True
-        if self.framecount%40==0 and self.lv8 == True:
+        if self.framecount%40==0 and self.current_lv>=8 and self.bossdefeat == True:
             spawnenemy('F-22 Falcon',12,0,20)
-
-        if self.score>=2000 and self.bossdefeat == True:#level 9
-            self.lv9 = True
-        if self.framecount%25==0 and self.lv9 == True:
+        if self.framecount%25==0 and self.current_lv>=9:#level 9
             spawnenemy('Plague Tank',10,10,10)
-        if self.framecount%21==0 and self.lv9 == True:#curse dps
+        if self.framecount%21==0 and self.current_lv>=9:#curse dps
             self.hp-=self.curse
             print("You are cursed! Hp-",self.curse)
             self.curse = 0
-
-        if self.score>=2800 and self.bossdefeat == True:#level 10
-            self.lv10 = True
-        if self.framecount%180==0 and self.lv10 == True:
+        if self.framecount%180==0 and self.current_lv>=10:#level 10
             spawnenemy('Xhamster',30,5,30)
-
-        if self.score>=3800:#level 11
-            self.lv11 = True
-        if self.framecount%20==0 and self.lv11 == True:
+        if self.framecount%20==0 and self.current_lv>=11:#level 11
             spawnenemy('Versatile Tank',15,5,25)
         #spawnenemy(ชื่อ,hp,damage เวลาชน,คะแนนที่ได้เวลาฆ่า)
             
@@ -291,30 +229,25 @@ class SpaceGameWindow(arcade.Window):
                 else :#no upgrade
                     shooting(1,1)
 
+        #upgrades
         if self.score>= 20 and self.speeddropped == False:
             self.speeddropped = True #speedup upgrade deployed
             upgrade('Speed',"images/greenfoot.png")
- 
         if self.score>= 80 and self.gundropped == False:
             self.gundropped = True #multigun upgrade deployed
             upgrade('Multi',"images/d.png")
-
         if self.score>=40 and self.autodropped == False:
             self.autodropped = True #automatic upgrade deployed
             upgrade('Auto',"images/d2.png")
-
         if self.bossdefeat == True and self.healdropped == False:
             self.healdropped = True #heal deployed after boss defeated
             upgrade('Heal',"images/d3.png")
-
-        if self.lv9 == True: #heal deployed randomly after level 9
+        if self.current_lv>=9: #heal deployed randomly after level 9
             if random.randrange(250)==0:
                 upgrade('Heal',"images/d3.png")
-
-        if self.lv8 == True and self.lifestealdropped == False:
+        if self.current_lv>=8 and self.lifestealdropped == False:
             self.lifestealdropped = True #lifesteal deployed after level 8
             upgrade('Lifesteal',"images/d4.png")
-            
         if self.score>=2500 and self.rapiddropped == False:
             self.rapiddropped = True #rapidfire deployed after score>=2500
             upgrade('Gatling',"images/d5.png")   
@@ -375,6 +308,7 @@ class SpaceGameWindow(arcade.Window):
                     enemy.hp-=1
                 if enemy.hp<=0:
                     if enemy.type == 'General Prayeth':
+                        self.current_lv+=1
                         self.BOSS = False
                         self.bossdefeat= True
                     self.score+=enemy.worth
@@ -444,11 +378,7 @@ class SpaceGameWindow(arcade.Window):
         if self.gameover == True:
             print("Game Over!")
             print("Final score = ",self.score)
-            if self.BOSS == True and self.bossspawned == True:
-                print("So close, yet so far.")
-            elif self.BOSS == False and self.bossspawned == False:
-                print("Not even close, baby!")
-            elif self.BOSS == False and self.bossspawned == True:
+            if self.BOSS == False and self.bossspawned == True:
                 print("You win! Thanks for playing. :D")
             sys.exit()
       
@@ -466,7 +396,6 @@ class SpaceGameWindow(arcade.Window):
                 shooting(3,0)
             else :#no upgrade
                 shooting(1,1)
-        #เดิน
         if symbol == arcade.key.LEFT:
             self.player_sprite.vx = -1-self.speedup
         if symbol == arcade.key.RIGHT:
@@ -474,9 +403,9 @@ class SpaceGameWindow(arcade.Window):
         if symbol == arcade.key.UP:
             self.player_sprite.vy = 1+self.speedup
         if symbol == arcade.key.DOWN:
-            self.player_sprite.vy = -1-self.speedup         
+            self.player_sprite.vy = -1-self.speedup
+            
     def on_key_release(self, symbol, modifiers):
-        #หยุดเดิน
         if symbol == arcade.key.LEFT or symbol == arcade.key.RIGHT:
             self.player_sprite.vx = 0
         elif symbol == arcade.key.UP or symbol == arcade.key.DOWN:

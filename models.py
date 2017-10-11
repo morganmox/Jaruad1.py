@@ -71,6 +71,7 @@ class EnemyBlue(arcade.Sprite):
         if random.randrange(2)==0:
             self.initpos = "bottom"
             self.center_y = 0
+            self.angle = 180
         else:
             self.center_y = SCREEN_HEIGHT
         self.center_x = random.randrange(SCREEN_WIDTH-40)+40
@@ -142,6 +143,7 @@ class EnemyAirforce(arcade.Sprite):
             self.center_x = 0
         else:
             self.center_x = SCREEN_WIDTH
+            self.angle = 180
 
     def update(self):
         if random.randrange(5)==0:
