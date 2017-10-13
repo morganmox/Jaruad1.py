@@ -13,13 +13,14 @@ class SpaceGameWindow(arcade.Window):
         arcade.set_background_color(arcade.color.AMAZON)
         self.framecount = 0
         #scoring/starting hp/gameover status
-        self.hp = 200
+        self.hp = 150
         self.score = 0
         self.score_text = None
-        self.score_list = [30,100,300,500,1000,1400,2000,2800,3800,5000,10000000]
+        self.score_list = [30,100,300,500,1000,1400,2000,2800,3800,4500,10000000]
         self.hp_text = None
-        self.boss_hp = 100
+        self.boss_hp = 0
         self.boss_hp_text = None
+        self.currentbossname = ''
         self.current_lv = 1
         self.current_lv_text = None
         self.gameover = False
@@ -35,9 +36,10 @@ class SpaceGameWindow(arcade.Window):
         self.lifesteal = False
         self.funnel = False
         #boss status
-        self.bossspawned = False
-        self.bossdefeat = False
+        self.boss_list = ['prayed','nasus']
+        self.bossdefeat = 0
         self.BOSS = False
+        self.nasusstack = 3
         #สร้างที่เก็บของแต่ละอย่างไว้ check collision
         self.all_sprites_list = arcade.SpriteList() #เก็บทุกอย่างไว้สั่งวาดทุกอย่างในคำสั่งเดียว
         self.bullet_sprites_list = arcade.SpriteList() #player bullet
@@ -62,7 +64,7 @@ class SpaceGameWindow(arcade.Window):
             self.hp_text = arcade.create_text(output2, arcade.color.WHITE, 17)
         arcade.render_text(self.hp_text, SCREEN_WIDTH/25, SCREEN_HEIGHT/25)
         if self.BOSS == True:#bosshp
-            output3 = f"General Prayeth : {self.boss_hp}"
+            output3 = f"{self.currentbossname} : {self.boss_hp}"
             if not self.boss_hp_text or output3 != self.boss_hp_text.text:
                 self.boss_hp_text = arcade.create_text(output3, arcade.color.RED, 17)
             arcade.render_text(self.boss_hp_text, SCREEN_WIDTH*16.5/25, SCREEN_HEIGHT/25)
@@ -81,16 +83,20 @@ class SpaceGameWindow(arcade.Window):
             elif typed == 'Plague Tank':enemy = Enemy("images/enemyplague.png",SCALE)
             elif typed == 'Xhamster':enemy = Hamtaro("images/hamtaro.png",SCALE)
             elif typed == 'Versatile Tank':enemy = Enemy("images/enemyorange.png",SCALE)
-            elif typed == 'Ghost Plane':
-                enemy = Stealth("images/ghost.png", SCALE)
-                enemy.unknown = True
+            elif typed == 'Ghost Plane':enemy = Stealth("images/ghost.png", SCALE)
             elif typed == 'F-22 Falcon':
                 enemy = Falcon("images/Falcon.png", SCALE)
                 enemy.soulripped = False
-            elif typed == 'General Prayeth':
-                enemy = BOSS("images/prayed.png", SCALE)
+            elif typed == 'General Prayeth' or typed == 'Nasus':
+                if typed == 'General Prayeth':
+                    enemy = BOSS("images/prayed.png", SCALE)
+                else:
+                    enemy = BOSS("images/nasus.png", SCALE)
+                    enemy.ultimate = False
                 self.BOSS = True
-                print("BOSS incoming! General Prayeth")
+                self.currentbossname = typed
+                print("BOSS incoming!",typed,".")
+                self.boss_hp = hp
             elif typed == 'nuclear':
                 enemy = Redbullet("images/nuclear.png",SCALE)
                 enemy.center_x = random.randrange(SCREEN_WIDTH-30)+30
@@ -103,12 +109,12 @@ class SpaceGameWindow(arcade.Window):
             self.enemy_sprites_list.append(enemy)
             self.all_sprites_list.append(enemy)
             
-        def shooting(number,adjust):
+        def shooting(owner,typed,image,scale,number,adjust):
             for i in range(number):
-                bullet = Bullet("images/bullet.png",SCALE*0.9)
-                bullet.type = 0
-                bullet.center_x = self.player_sprite.center_x-(self.player_sprite.width/2*(i-1+adjust))
-                bullet.bottom = self.player_sprite.top
+                bullet = Bullet(image,SCALE*scale)
+                bullet.type = typed
+                bullet.center_x = owner.center_x-(owner.width/2*(i-1+adjust))
+                bullet.bottom = owner.top
                 self.bullet_sprites_list.append(bullet)
                 self.all_sprites_list.append(bullet)
         
@@ -119,6 +125,8 @@ class SpaceGameWindow(arcade.Window):
                 enemybullet = Torpedo("images/torpedo.png", SCALE)
             elif host == 'Xhamster':
                 enemybullet = Seed("images/shit.png", SCALE*0.9)
+            elif host == 'Nasus':
+                enemybullet = Falconbullet("images/cane.png",SCALE*1.2)
             elif host == 'F-22 Falcon':#unique (2 bullets)
                 for i in range(2):
                     enemybullet = Falconbullet("images/falconbullet.png",SCALE*0.9)
@@ -144,7 +152,7 @@ class SpaceGameWindow(arcade.Window):
             
         self.all_sprites_list.update()
         self.framecount+=1
-        
+
         if self.score>=self.score_list[0]:#levelup
             self.score_list.pop(0)
             self.current_lv+=1
@@ -164,32 +172,33 @@ class SpaceGameWindow(arcade.Window):
             spawnenemy('Kamikaze',random.randrange(3)+3,0,3)
         if self.framecount%150==0 and self.current_lv>=4 and self.current_lv<=9:#lv 4-9
             spawnenemy('Elite Tank',9,2,5)
-        if self.current_lv>=5 and self.bossspawned == False:#BOSS (lv 5)
-            self.bossspawned = True
-            spawnenemy('General Prayeth',100,-666,44)
-        if self.BOSS == True and self.framecount%40==0:#Boss's weapon
+        if self.current_lv>=5 and 'prayed' in self.boss_list:#BOSS (lv 5)
+            self.boss_list.remove('prayed')
+            spawnenemy('General Prayeth',150,-666,44)
+        if self.BOSS == True and self.currentbossname == 'General Prayeth' and self.framecount%40==0:#Prayeth's weapon
             spawnenemy('nuclear',6,3,0)
-        if self.framecount%180==0 and self.current_lv>=6 and self.bossdefeat == True:#lv 6
+        if self.framecount%180==0 and self.current_lv>=6 and self.bossdefeat >=1 and self.current_lv<=11:#lv 6-11
             spawnenemy('Thorn Tank',15,6,20)
-        if self.framecount%30==0 and self.current_lv>=7 and self.bossdefeat == True:#lv 7
+        if self.framecount%30==0 and self.current_lv>=7 and self.current_lv<=11 and self.bossdefeat >=1:#lv 7-11
             spawnenemy('Ghost Plane',8,1,10)
-        if self.framecount%40==0 and self.current_lv>=8:#lv 8
+        if self.framecount%40==0 and self.current_lv>=8 and self.current_lv<=11:#lv 8-11
             spawnenemy('F-22 Falcon',12,0,20)
-        if self.framecount%25==0 and self.current_lv>=9:#lv 9
+        if self.framecount%25==0 and self.current_lv>=9 and self.current_lv<=11:#lv 9-11
             spawnenemy('Plague Tank',10,10,10)
-        if self.framecount%21==0 and self.current_lv>=9:#curse dps
+        if self.framecount%21==0 and self.current_lv>=9 and self.current_lv<=11:#curse dps
             self.hp-=self.curse
             print("You are cursed! Hp-",self.curse)
             self.curse = 0
-        if self.framecount%180==0 and self.current_lv>=10:#lv 10
+        if self.framecount%180==0 and self.current_lv>=10 and self.current_lv<=11:#lv 10-11
             spawnenemy('Xhamster',30,5,30)
-        if self.framecount%20==0 and self.current_lv>=11:#lv 11
+        if self.framecount%20==0 and self.current_lv==11:#lv 11
             spawnenemy('Versatile Tank',15,5,25)
-        if self.framecount%27==0 and self.current_lv>=12:
-            print("out of idea")
+        if self.current_lv>=12 and 'nasus' in self.boss_list:#BOSS (lv 12)
+            self.boss_list.remove('nasus')
+            spawnenemy('Nasus',300,-666,350)
         #spawnenemy(ชื่อ,hp,damage เวลาชน,คะแนนที่ได้เวลาฆ่า)
             
-        for enemy in self.enemy_sprites_list:#ศัตรูตัวที่ยิงได้
+        for enemy in self.enemy_sprites_list:#ศัตรูตัวที่มีลูกเล่นพิเศษ
             if enemy.type == 'Elite Tank':
                 if self.framecount%40==0:
                     enemyshoot('Elite Tank','Bullet',1)
@@ -211,24 +220,31 @@ class SpaceGameWindow(arcade.Window):
             elif enemy.type == 'Versatile Tank':
                 if self.framecount%30==0:
                     enemyshoot('Versatile Tank','Bullet',4)
+            elif enemy.type == 'Nasus':
+                if enemy.ultimate == False:
+                    if self.framecount%35==0:
+                        enemyshoot('Nasus','Cane',self.nasusstack)
+                else:
+                    if self.framecount%15==0:
+                        enemyshoot('Nasus','Cane',self.nasusstack)
+                    if self.framecount%40==0:
+                        self.hp = int(self.hp*95/100)-1
+                        enemy.hp+=5
+                        self.boss_hp+=5
+                        print("Fury of the sand damage! hp-5% (Nasus's hp+5)")
         #enemyshoot(ชื่อคนยิง,ชื่อกระสุน,damage ตอนโดน)
 
         if self.funnel == True:#funnel ยิง
             for funnel in self.funnel_sprites_list:
-                if self.framecount%(self.firedelay-1)==0:
-                    bullet = Bullet("images/falconbullet.png",SCALE*0.7)
-                    bullet.type = 1
-                    bullet.center_x = funnel.center_x
-                    bullet.bottom = funnel.top
-                    self.bullet_sprites_list.append(bullet)
-                    self.all_sprites_list.append(bullet)
-                    
+                if self.framecount%self.firedelay==0:
+                    shooting(funnel,1,"images/falconbullet.png",0.7,1,1)
+
         if self.automatic == True:#เปิดยิง auto
             if self.framecount%self.firedelay==0:
                 if self.multigun == True:#เปิดยิง 3 ลูก
-                    shooting(3,0)
+                    shooting(self.player_sprite,0,"images/bullet.png",0.9,3,0)
                 else :#no upgrade
-                    shooting(1,1)
+                    shooting(self.player_sprite,0,"images/bullet.png",0.9,1,1)
 
         #upgrades
         if self.score>= 20 and 'speed' in self.upgrades_list:
@@ -240,7 +256,7 @@ class SpaceGameWindow(arcade.Window):
         if self.score>=40 and 'auto' in self.upgrades_list:
             self.upgrades_list.remove('auto') #automatic upgrade deployed
             upgrade('Auto',"images/d2.png",1)
-        if self.bossdefeat == True and 'heal' in self.upgrades_list:
+        if self.bossdefeat == 1 and 'heal' in self.upgrades_list:
             self.upgrades_list.remove('heal') #heal deployed after boss defeated
             upgrade('Heal',"images/d3.png",1)
         if self.current_lv>=9 and self.score<=3800: #heal deploy constantly after level 9
@@ -274,8 +290,8 @@ class SpaceGameWindow(arcade.Window):
                     self.hp-=enemy.hp
                     enemy.kill()
                     print("Hitted by Kamikaze! Hp-",enemy.hp)
-                elif enemy.type == 'General Prayeth':#Fatal damage (Boss)
-                    print("Coup by General Prayeth! Instant death.")
+                elif enemy.type == 'General Prayeth' or enemy.type == 'Nasus':#Fatal damage (Boss)
+                    print(enemy.type,"does fatal damage! Instant death.")
                     self.gameover = True
                 elif enemy.type == 'F-22 Falcon':#Falcon's soulrip
                     if enemy.soulripped == False:
@@ -299,25 +315,28 @@ class SpaceGameWindow(arcade.Window):
                     self.hp+=self.leechamount
                 bullet.kill()
             for enemy in hit2:
-                if enemy.type == 'General Prayeth':
-                    enemy.hp-=1
+                if enemy.type == 'General Prayeth' or enemy.type == 'Nasus':#boss hp display
                     self.boss_hp-=1
-                elif (enemy.type == 'Thorn Tank' or enemy.type == 'Versatile Tank') and bullet.type == 0:
+                    if enemy.type == 'Nasus':
+                        if enemy.ultimate == False and enemy.hp<=50:#nasus ulti
+                            enemy.ultimate = True
+                            enemy.width+=30
+                            enemy.height+=40
+                            enemy.hp +=300
+                            self.boss_hp +=300
+                            print("Nasus activate fury of the sand!")
+                if (enemy.type == 'Thorn Tank' or enemy.type == 'Versatile Tank') and bullet.type == 0:
                     self.hp-=1
                     enemy.hp-=1
                     print(enemy.type,"reflect your bullet! Hp-1")
-                elif enemy.type == 'Ghost Plane':
-                    if enemy.unknown == True:
-                        enemy.unknown = False
-                        print("Invisible object detected! Be careful.")
-                    enemy.hp-=1
+                #enemy with thornmail
                 else:
                     enemy.hp-=1
                 if enemy.hp<=0:
-                    if enemy.type == 'General Prayeth':
+                    if enemy.type == 'General Prayeth' or enemy.type == 'Nasus':
                         self.current_lv+=1
                         self.BOSS = False
-                        self.bossdefeat= True
+                        self.bossdefeat+=1
                     self.score+=enemy.worth
                     print(enemy.type,"has been killed. score+",enemy.worth)
                     enemy.kill()
@@ -343,18 +362,16 @@ class SpaceGameWindow(arcade.Window):
                         self.firedelay-=2
                     print("Firerate increased!")
                 elif upgrade.type == 'Heal':
-                    self.hp +=250
-                    print("Heal! hp+250")
+                    self.hp +=100
+                    print("Heal! hp+100")
                 elif upgrade.type == 'SATANIC':
                     self.leechamount+=1
                     print("Lifessteal increased!")
                 elif upgrade.type == 'funnel':
                     self.funnel = True
-                    print("You got some assistants")
+                    print("You got some assistants!")
                     for i in range(2):
                         funnel = Funnel("images/ship.png", SCALE*0.55)
-                        funnel.center_y = self.player_sprite.center_y
-                        funnel.center_x = self.player_sprite.center_x-self.player_sprite.width+2*self.player_sprite.width*(i)
                         self.funnel_sprites_list.append(funnel)
                         self.all_sprites_list.append(funnel)
                 upgrade.kill()
@@ -378,6 +395,10 @@ class SpaceGameWindow(arcade.Window):
                 if enemybullet.type == 'Ruin king':
                     self.hp = int(self.hp*96/100)-enemybullet.damage
                     print("Got hit by Falcon's bullet! hp-4% in addition.")
+                elif enemybullet.type == 'Cane':
+                    self.nasusstack+=3
+                    self.hp-=enemybullet.damage
+                    print("The cane just got stronger! hp-",enemybullet.damage,"(stack+3)")
                 elif enemybullet.type == 'Hamster shit':
                     if random.randrange(100)>5:
                         self.hp-=enemybullet.damage
@@ -394,11 +415,14 @@ class SpaceGameWindow(arcade.Window):
         #gameover status
         if self.hp <= 0:
             self.gameover = True
-        if self.gameover == True:
+        if self.gameover == True or self.bossdefeat == 2:
             print("Game Over!")
             print("Score =",self.score)
-            print("Level reached =",self.current_lv)
-            print("Final score : (Score)+(Level-1x150) =",self.score+(self.current_lv-1)*150)
+            print("Level reached x 150 =",(self.current_lv-1)*150)
+            print("Total boss(es) defeated x 200 =",self.bossdefeat*200)
+            print("Final score =",self.score+(self.current_lv-1)*150+(self.bossdefeat)*200)
+            if self.bossdefeat == 2:
+                print("Game complete! Thanks for playing.")
             sys.exit()
       
     def on_key_press(self, symbol, modifiers):

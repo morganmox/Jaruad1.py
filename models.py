@@ -9,32 +9,23 @@ class Funnel(arcade.Sprite):
     def __init__(self,filename,scale):
         super().__init__(filename,scale)
         self.vx = 0
-        self.vy = 0
         self.ran = 0
+        self.center_x = SCREEN_WIDTH/2
+        self.center_y = 50
     def update(self):
-        self.center_x+=self.vx*4
-        self.center_y+=self.vy*4
+        self.center_x+=self.vx*6
         if random.randrange(10)<2:
             self.ran = random.randrange(5)
             if self.ran==0:
                 self.vx = 0
-                self.vy = 0
-            elif self.ran==1:
+            elif self.ran==1 or self.ran==2:
                 self.vx = 1
-            elif self.ran==2:
-                self.vy = 1
-            elif self.ran==3:
-                self.vy = -1
-            elif self.ran==4:
+            elif self.ran==3 or self.ran==4:
                 self.vx = -1
         if self.center_x > SCREEN_WIDTH:
             self.center_x = 0
         if self.center_x < 0:
             self.center_x = SCREEN_WIDTH
-        if self.center_y > SCREEN_HEIGHT-100:
-            self.center_y = 0
-        if self.center_y < 0:
-            self.center_y = SCREEN_HEIGHT-100
 
 class Hamtaro(arcade.Sprite):
     def __init__(self,filename,scale):

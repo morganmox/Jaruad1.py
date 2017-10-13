@@ -40,7 +40,7 @@
 
 5.BOSS : Ganeral Prayeth (score = 500)
 -LV = 5
--hp = 100
+-hp = 150
 -speed = 3
 -score worth = 44
 -collision damage = instant kill.
@@ -97,3 +97,17 @@
 -score worth = 25
 -collision damage = 5
 -weapon = 1.Bullet (speed = 2++,damage = 4) 2.Thorn (reflect damage)
+
+12.Nasus (score = 4500)
+-LV = 12
+-hp = 300
+-speed = 3
+-score worth = 350
+-collision damage = instant kill.
+-weapon = Cane (speed = 18,damage = 3+stack)
+*+3 stack per player hit.
+-ultimate = Fury of the sand (hp<50)
+	-hp +300
+	-size += w30:h40
+	-drain 5%hp+1 per 40 frame (heal nasus = 5)
+	-firedelay -20
