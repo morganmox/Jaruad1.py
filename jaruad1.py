@@ -130,19 +130,14 @@ class SpaceGameWindow(arcade.Window):
             elif host == 'F-22 Falcon':#unique (2 bullets)
                 for i in range(2):
                     enemybullet = Falconbullet("images/falconbullet.png",SCALE*0.9)
-                    enemybullet.center_x = enemy.center_x-(enemy.width/4)+(enemy.width/2*i)
-                    enemybullet.top = enemy.bottom
-                    enemybullet.damage = damage
-                    enemybullet.type = typed
-                    self.enemy_bullet_sprites_list.append(enemybullet)
-                    self.all_sprites_list.append(enemybullet)        
+                    enemybullet.center_x = enemy.center_x-(enemy.width/4)+(enemy.width/2*i)      
             if host !='F-22 Falcon':#typical (1 bullet)
                 enemybullet.center_x = enemy.center_x
-                enemybullet.top = enemy.bottom
-                enemybullet.damage = damage
-                enemybullet.type = typed
-                self.enemy_bullet_sprites_list.append(enemybullet)
-                self.all_sprites_list.append(enemybullet)
+            enemybullet.top = enemy.bottom
+            enemybullet.damage = damage
+            enemybullet.type = typed
+            self.enemy_bullet_sprites_list.append(enemybullet)
+            self.all_sprites_list.append(enemybullet)
             
         def upgrade(typed,images,mul):
             upgrade = Greenfoot(images, SCALE*mul)
@@ -383,7 +378,7 @@ class SpaceGameWindow(arcade.Window):
                 for fence in hit4:
                     fence.kill()
                 self.fenceproof = False
-                print("You just used your fenceproof!")
+                print("You used your fenceproof!")
             else:
                 print("Fence does fatal damage! Instant death.")
                 self.gameover = True
@@ -426,7 +421,7 @@ class SpaceGameWindow(arcade.Window):
             sys.exit()
       
     def on_key_press(self, symbol, modifiers):
-        def shooting(number,adjust):
+        def shooting(number,adjust):#pew pew
             for i in range(number):
                 bullet = Bullet("images/bullet.png",SCALE*0.9)
                 bullet.type = 0 #0 = player,1 = funnel
@@ -434,7 +429,6 @@ class SpaceGameWindow(arcade.Window):
                 bullet.bottom = self.player_sprite.top
                 self.bullet_sprites_list.append(bullet)
                 self.all_sprites_list.append(bullet)
-        #pew pew
         if symbol == arcade.key.SPACE and self.automatic == False:
             if self.multigun == True:#เปิดยิง 3 ลูก
                 shooting(3,0)

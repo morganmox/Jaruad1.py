@@ -36,6 +36,7 @@ class Hamtaro(arcade.Sprite):
     def update(self):
         if self.center_y > SCREEN_HEIGHT-135:
             self.center_y-=1
+            
 class Seed(arcade.Sprite):
     def __init__(self,filename,scale):
         super().__init__(filename,scale)
