@@ -12,7 +12,7 @@ elif difficult == 'hard':
 elif difficult == 'heroic' or difficult == 'hero':
     HEART = 150;FENCE = 1;STATUS = 'god.';MUL = 1.5
 else:
-    HEART = 600;FENCE = 50;STATUS = 'monkey.';MUL = 0.75
+    HEART = 9999;FENCE = 999;STATUS = 'monkey.';MUL = 0.5
     
 class SpaceGameWindow(arcade.Window):
     def __init__(self, width, height):
@@ -170,7 +170,7 @@ class SpaceGameWindow(arcade.Window):
             self.score_list.pop(0)
             self.current_lv+=1
         
-        if self.framecount%75==0: #รั้วลวดหนาม
+        if self.framecount%75==0 and STATUS!="monkey.": #รั้วลวดหนาม
             fence = Torpedo("images/fence.png", SCALE*1.1)
             fence.center_y = SCREEN_HEIGHT
             fence.center_x = random.randrange(SCREEN_WIDTH)+20
@@ -194,7 +194,7 @@ class SpaceGameWindow(arcade.Window):
             spawnenemy('Thorn Tank',15,6,20)
         if self.framecount%30==0 and self.current_lv>=7 and self.current_lv<=11 and self.bossdefeat >=1:#lv 7-11
             spawnenemy('Ghost Plane',8,1,10)
-        if self.framecount%40==0 and self.current_lv>=8 and self.current_lv<=11:#lv 8-11
+        if self.framecount%40==0 and self.current_lv>=8 and self.current_lv<=11 and STATUS!="monkey.":#lv 8-11
             spawnenemy('F-22 Falcon',12,0,20)
         if self.framecount%25==0 and self.current_lv>=9 and self.current_lv<=11:#lv 9-11
             spawnenemy('Plague Tank',10,10,10)
