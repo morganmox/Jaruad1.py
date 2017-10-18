@@ -111,3 +111,11 @@
 	-size += w30:h40
 	-drain 5%hp+1 per 40 frame (heal nasus = 5)
 	-firedelay -20
+
+13.Balloon Tank (boss 2 defeated)
+-LV = 13
+-hp = 18
+-speed = 5-9
+-score worth = 35
+-collision damage = 100 + absorbed damagex3
+*size+3 when received damage
