@@ -29,10 +29,12 @@ class SpaceGameWindow(arcade.Window):
         self.boss_hp_text = None
         self.current_lv = 1
         self.current_lv_text = None
+        self.fenceproof = FENCE
+        self.fenceproof_text = None
         self.currentbossname = ''
         self.gameover = False
         self.curse = 0
-        self.fenceproof = FENCE
+
         #upgrade status
         self.upgrades_list = ['speed','auto','multi','heal','lifesteal','rapid','satanic','funnel']#upgrade list not being deployed
         self.speedup = 0
@@ -65,7 +67,7 @@ class SpaceGameWindow(arcade.Window):
         output = f"Score : {self.score}"#scoreboard
         if not self.score_text or output != self.score_text.text:
             self.score_text = arcade.create_text(output, arcade.color.WHITE, 17)
-        arcade.render_text(self.score_text, SCREEN_WIDTH/25, SCREEN_HEIGHT*1.72/25)
+        arcade.render_text(self.score_text, SCREEN_WIDTH/25, SCREEN_HEIGHT*2.44/25)
         output2 = f"Player's HP : {self.hp}"#hp
         if not self.hp_text or output2 != self.hp_text.text:
             self.hp_text = arcade.create_text(output2, arcade.color.WHITE, 17)
@@ -78,7 +80,11 @@ class SpaceGameWindow(arcade.Window):
         output4 = f"Level : {self.current_lv}"#level ปัจจุบัน
         if not self.current_lv_text or output4 != self.current_lv_text.text:
             self.current_lv_text = arcade.create_text(output4, arcade.color.WHITE, 17)
-        arcade.render_text(self.current_lv_text, SCREEN_WIDTH/25, SCREEN_HEIGHT*2.44/25)
+        arcade.render_text(self.current_lv_text, SCREEN_WIDTH/25, SCREEN_HEIGHT*3.12/25)
+        output5 = f"Fenceproof : {self.fenceproof}"#รั้ว
+        if not self.fenceproof_text or output5 != self.fenceproof_text.text:
+            self.fenceproof_text = arcade.create_text(output5, arcade.color.WHITE, 17)
+        arcade.render_text(self.fenceproof_text, SCREEN_WIDTH/25, SCREEN_HEIGHT*1.72/25)
 
     def update(self,x):
         def spawnenemy(typed,hp,damage,worth):
