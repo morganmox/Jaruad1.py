@@ -4,10 +4,10 @@ import sys
 from models import *
 #ตรงนี้อย่าซน
 SCREEN_WIDTH = 600;SCREEN_HEIGHT = 600;HEART = 0;FENCE = 0;STATUS = '';SCALE = 1;MUL = 0
-difficult = input("Welcome to jaruad1.py! Please select a difficulty.\nNormal\nHard\nHeroic\n").lower()
-if difficult == 'normal':
+difficult = input("Welcome to jaruad1.py! Please select a difficulty.\n(Easy/Normal/Hard/Heroic)\n").lower()
+if difficult == 'normal' or difficult == 'human':
     HEART = 300;FENCE = 5;STATUS = 'human.';MUL = 1
-elif difficult == 'hard':
+elif difficult == 'hard' or difficult == 'veteran':
     HEART = 250;FENCE = 3;STATUS = 'veteran.';MUL = 1.25
 elif difficult == 'heroic' or difficult == 'hero':
     HEART = 150;FENCE = 1;STATUS = 'god.';MUL = 1.5
@@ -20,7 +20,7 @@ class SpaceGameWindow(arcade.Window):
         arcade.set_background_color(arcade.color.AMAZON)
         self.framecount = 0
         #scoring/starting hp/gameover status
-        self.score_list = [30,100,300,500,1000,1400,2000,2800,3800,4500,10000000]
+        self.score_list = [30,100,300,500,1000,1400,2000,2800,3800,4500,5500,10000000]
         self.hp = HEART
         self.hp_text = None
         self.score = 0
@@ -34,7 +34,6 @@ class SpaceGameWindow(arcade.Window):
         self.currentbossname = ''
         self.gameover = False
         self.curse = 0
-
         #upgrade status
         self.upgrades_list = ['speed','auto','multi','heal','lifesteal','rapid','satanic','funnel']#upgrade list not being deployed
         self.speedup = 0
@@ -48,7 +47,7 @@ class SpaceGameWindow(arcade.Window):
         self.boss_list = ['prayed','nasus']
         self.bossdefeat = 0
         self.BOSS = False
-        self.nasusstack = 3
+        self.nasusstack = 6
         #สร้างที่เก็บของแต่ละอย่างไว้ check collision
         self.all_sprites_list = arcade.SpriteList() #เก็บทุกอย่างไว้สั่งวาดทุกอย่างในคำสั่งเดียว
         self.bullet_sprites_list = arcade.SpriteList() #player bullet
@@ -59,7 +58,7 @@ class SpaceGameWindow(arcade.Window):
         self.upgrade_sprites_list = arcade.SpriteList() #upgrades
         self.player_sprite = Ship("images/ship.png", SCALE*0.95) #spawn ตัวคนเล่น
         self.all_sprites_list.append(self.player_sprite) #ยัดตัวคนเล่นเข้าไปใน list ที่จะวาด
-        print("You are a",STATUS,"Game start with Hp =",self.hp,",Fenceproof(s) =",self.fenceproof)
+        print("You play as a",STATUS,"Game start with Hp =",self.hp,",Fenceproof(s) =",self.fenceproof)
         
     def on_draw(self):
         arcade.start_render()
@@ -174,7 +173,7 @@ class SpaceGameWindow(arcade.Window):
             self.current_lv+=1
         
         if self.framecount%75==0: #รั้วลวดหนาม
-            fence = Torpedo("images/fence.png", SCALE*1.1)
+            fence = Torpedo("images/fence.png", 1.2)
             fence.center_y = SCREEN_HEIGHT
             fence.center_x = random.randrange(SCREEN_WIDTH)+20
             self.fence_sprites_list.append(fence)
@@ -185,7 +184,7 @@ class SpaceGameWindow(arcade.Window):
         if self.framecount%30==0 and self.current_lv>=2 and self.current_lv<=7:#lv 2-7
             spawnenemy('Submarine',2,0,2)
         if self.framecount%36==0 and self.current_lv>=3 and self.current_lv<=10:#lv 3-10
-            spawnenemy('Kamikaze',random.randrange(3)+3,0,3)
+            spawnenemy('Kamikaze',random.randrange(3)+4,0,3)
         if self.framecount%150==0 and self.current_lv>=4 and self.current_lv<=9:#lv 4-9
             spawnenemy('Elite Tank',9,2,5)
         if self.current_lv>=5 and 'prayed' in self.boss_list:#BOSS (lv 5)
@@ -210,8 +209,8 @@ class SpaceGameWindow(arcade.Window):
         if self.current_lv>=12 and 'nasus' in self.boss_list:#BOSS (lv 12)
             self.boss_list.remove('nasus')
             spawnenemy('Nasus',300,-666,350)
-        if self.framecount%35==0 and self.current_lv>=13:#lv 13
-            spawnenemy('Balloon Tank',18,100,35)
+        if self.framecount%25==0 and self.current_lv>=13:#lv 13
+            spawnenemy('Balloon Tank',20,50,35)
         #spawnenemy(ชื่อ,hp,damage เวลาชน,คะแนนที่ได้เวลาฆ่า)
             
         for enemy in self.enemy_sprites_list:#ศัตรูตัวที่มีลูกเล่นพิเศษ
@@ -238,16 +237,15 @@ class SpaceGameWindow(arcade.Window):
                     enemyshoot('Versatile Tank','Bullet',4)
             elif enemy.type == 'Nasus':
                 if enemy.ultimate == False:
-                    if self.framecount%35==0:
+                    if self.framecount%40==0:
                         enemyshoot('Nasus','Cane',self.nasusstack)
                 else:
-                    if self.framecount%15==0:
+                    if self.framecount%20==0:
                         enemyshoot('Nasus','Cane',self.nasusstack)
                     if self.framecount%40==0:
                         self.hp = int(self.hp*95/100)-1
                         enemy.hp+=5
                         self.boss_hp+=5
-                        print("Fury of the sand damage! hp-5% (Nasus's hp+5)")
         #enemyshoot(ชื่อคนยิง,ชื่อกระสุน,damage ตอนโดน)
 
         if self.funnel == True:#funnel ยิง
@@ -301,7 +299,6 @@ class SpaceGameWindow(arcade.Window):
                     if self.framecount%5==0:
                         enemy.hp+=1
                         self.hp-=1
-                        print("Ghost Plane consumed your soul! Hp-1")
                 elif enemy.type == 'Kamikaze':#damage = remaining hp
                     self.hp-=enemy.hp
                     enemy.kill()
@@ -339,7 +336,6 @@ class SpaceGameWindow(arcade.Window):
                             print("Nasus activate fury of the sand!")
                 elif (enemy.type == 'Thorn Tank' or enemy.type == 'Versatile Tank') and bullet.type == 0:
                     self.hp-=1
-                    print(enemy.type,"reflect your bullet! Hp-1")
                 elif enemy.type == 'Balloon Tank':
                     enemy.width+=3;enemy.height+=3;enemy.damage+=3
                 enemy.hp-=1
@@ -373,8 +369,8 @@ class SpaceGameWindow(arcade.Window):
                         self.firedelay-=2
                     print("Firerate increased!")
                 elif upgrade.type == 'Heal':
-                    self.hp +=100
-                    print("Heal! hp+100")
+                    self.hp +=HEART-50
+                    print("Heal! hp+",HEART-50)
                 elif upgrade.type == 'SATANIC':
                     self.leechamount+=1
                     print("Lifessteal increased!")

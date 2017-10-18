@@ -24,7 +24,7 @@
 
 3.Kamikaze (score = 100)
 -LV = 3
--hp = 3-5
+-hp = 4-6
 -speed = 0++
 -score worth = 3
 -collision damage = remaining hp.
@@ -104,7 +104,7 @@
 -speed = 3
 -score worth = 350
 -collision damage = instant kill.
--weapon = Cane (speed = 18,damage = 3+stack)
+-weapon = Cane (speed = 18,damage = 6+stack)
 *+3 stack per player hit.
 -ultimate = Fury of the sand (hp<50)
 	-hp +300
@@ -114,8 +114,8 @@
 
 13.Balloon Tank (boss 2 defeated)
 -LV = 13
--hp = 18
+-hp = 20
 -speed = 5-9
 -score worth = 35
--collision damage = 100 + absorbed damagex3
-*size+3 when received damage
+-collision damage = 50 + absorbed damagex3
+*size+3 when receive damage.
