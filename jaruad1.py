@@ -165,8 +165,6 @@ class SpaceGameWindow(arcade.Window):
             
         self.all_sprites_list.update()
         self.framecount+=1
-        if STATUS == 'monkey.' and self.framecount%10 == 0:
-            self.hp = 9999;self.fenceproof = 999
 
         if self.score>=self.score_list[0]:#levelup
             self.score_list.pop(0)
@@ -337,7 +335,7 @@ class SpaceGameWindow(arcade.Window):
                 elif (enemy.type == 'Thorn Tank' or enemy.type == 'Versatile Tank') and bullet.type == 0:
                     self.hp-=1
                 elif enemy.type == 'Balloon Tank':
-                    enemy.width+=3;enemy.height+=3;enemy.damage+=3
+                    enemy.width+=4;enemy.height+=4;enemy.damage+=4
                 enemy.hp-=1
                 if enemy.hp<=0:
                     if enemy.type == 'General Prayeth' or enemy.type == 'Nasus':
