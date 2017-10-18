@@ -3,29 +3,36 @@ import random
 import sys
 from models import *
 #ตรงนี้อย่าซน
-SCREEN_WIDTH = 600
-SCREEN_HEIGHT = 600
-SCALE = 1      
+SCREEN_WIDTH = 600;SCREEN_HEIGHT = 600;HEART = 0;FENCE = 0;STATUS = '';SCALE = 1;MUL = 0
+difficult = input("Welcome to jaruad1.py! Please select a difficulty.\nNormal\nHard\nHeroic\n").lower()
+if difficult == 'normal':
+    HEART = 300;FENCE = 5;STATUS = 'human.';MUL = 1
+elif difficult == 'hard':
+    HEART = 250;FENCE = 3;STATUS = 'veteran.';MUL = 1.25
+elif difficult == 'heroic' or difficult == 'hero':
+    HEART = 150;FENCE = 1;STATUS = 'god.';MUL = 1.5
+else:
+    HEART = 600;FENCE = 50;STATUS = 'monkey.';MUL = 0.75
+    
 class SpaceGameWindow(arcade.Window):
     def __init__(self, width, height):
         super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT)
-        #bg setting,framecount
         arcade.set_background_color(arcade.color.AMAZON)
         self.framecount = 0
         #scoring/starting hp/gameover status
-        self.hp = 150
+        self.score_list = [30,100,300,500,1000,1400,2000,2800,3800,4500,10000000]
+        self.hp = HEART
+        self.hp_text = None
         self.score = 0
         self.score_text = None
-        self.score_list = [30,100,300,500,1000,1400,2000,2800,3800,4500,10000000]
-        self.hp_text = None
         self.boss_hp = 0
         self.boss_hp_text = None
-        self.currentbossname = ''
         self.current_lv = 1
         self.current_lv_text = None
+        self.currentbossname = ''
         self.gameover = False
         self.curse = 0
-        self.fenceproof = True
+        self.fenceproof = FENCE
         #upgrade status
         self.upgrades_list = ['speed','auto','multi','heal','lifesteal','rapid','satanic','funnel']#upgrade list not being deployed
         self.speedup = 0
@@ -50,7 +57,7 @@ class SpaceGameWindow(arcade.Window):
         self.upgrade_sprites_list = arcade.SpriteList() #upgrades
         self.player_sprite = Ship("images/ship.png", SCALE*0.95) #spawn ตัวคนเล่น
         self.all_sprites_list.append(self.player_sprite) #ยัดตัวคนเล่นเข้าไปใน list ที่จะวาด
-        print("Game start with Hp =",self.hp)
+        print("You are a",STATUS,"Game start with Hp =",self.hp,",Fenceproof(s) =",self.fenceproof)
         
     def on_draw(self):
         arcade.start_render()
@@ -127,17 +134,22 @@ class SpaceGameWindow(arcade.Window):
                 enemybullet = Seed("images/shit.png", SCALE*0.9)
             elif host == 'Nasus':
                 enemybullet = Falconbullet("images/cane.png",SCALE*1.2)
-            elif host == 'F-22 Falcon':#unique (2 bullets)
+            if host == 'F-22 Falcon':#unique (2 bullets)
                 for i in range(2):
                     enemybullet = Falconbullet("images/falconbullet.png",SCALE*0.9)
-                    enemybullet.center_x = enemy.center_x-(enemy.width/4)+(enemy.width/2*i)      
-            if host !='F-22 Falcon':#typical (1 bullet)
+                    enemybullet.center_x = enemy.center_x-(enemy.width/4)+(enemy.width/2*i)
+                    enemybullet.top = enemy.bottom
+                    enemybullet.damage = damage
+                    enemybullet.type = typed
+                    self.enemy_bullet_sprites_list.append(enemybullet)
+                    self.all_sprites_list.append(enemybullet)
+            else:#typical (1 bullet)
                 enemybullet.center_x = enemy.center_x
-            enemybullet.top = enemy.bottom
-            enemybullet.damage = damage
-            enemybullet.type = typed
-            self.enemy_bullet_sprites_list.append(enemybullet)
-            self.all_sprites_list.append(enemybullet)
+                enemybullet.top = enemy.bottom
+                enemybullet.damage = damage
+                enemybullet.type = typed
+                self.enemy_bullet_sprites_list.append(enemybullet)
+                self.all_sprites_list.append(enemybullet)
             
         def upgrade(typed,images,mul):
             upgrade = Greenfoot(images, SCALE*mul)
@@ -374,10 +386,10 @@ class SpaceGameWindow(arcade.Window):
         #collision checking 4 (player vs fence)
         hit4 = arcade.check_for_collision_with_list(self.player_sprite,self.fence_sprites_list)
         if len(hit4)!=0:
-            if self.fenceproof == True:
+            if self.fenceproof >0:
                 for fence in hit4:
                     fence.kill()
-                self.fenceproof = False
+                self.fenceproof -=1
                 print("You used your fenceproof!")
             else:
                 print("Fence does fatal damage! Instant death.")
@@ -413,9 +425,10 @@ class SpaceGameWindow(arcade.Window):
         if self.gameover == True or self.bossdefeat == 2:
             print("Game Over!")
             print("Score =",self.score)
-            print("Level reached x 150 =",(self.current_lv-1)*150)
-            print("Total boss(es) defeated x 200 =",self.bossdefeat*200)
-            print("Final score =",self.score+(self.current_lv-1)*150+(self.bossdefeat)*200)
+            print("Level reached :",self.current_lv-1,"x 150 =",(self.current_lv-1)*150)
+            print("Total boss(es) defeated :",self.bossdefeat ,"x 200 =",self.bossdefeat*200)
+            print("Difficulty multiplier :",STATUS,"x",MUL)
+            print("Final score =",int((self.score+(self.current_lv-1)*150+(self.bossdefeat)*200)*MUL))
             if self.bossdefeat == 2:
                 print("Game complete! Thanks for playing.")
             sys.exit()
