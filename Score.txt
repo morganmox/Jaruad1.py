@@ -1,10 +1,4 @@
-Score record
-10989 : test (god.) [CLEARED]
-1128 : dickhead (human.)
-2925 : dededf (god.)
-975 : efefefe (monkey.)
-975 : vdvdv (monkey.)
-975 : orfrofkeokf (monkey.)
-1067 : dvdvdv (monkey.)
-975 : lrgmrmg (monkey.)
-12033 : fewf,ewfl;, (god.) [CLEARED]
+12033:fewf,ewfl(god.)[CLEARED]
+10989:test(god.)[CLEARED]
+750:dickheadanddipshit(god.)
+42:##INVALID_NAME##(god.)

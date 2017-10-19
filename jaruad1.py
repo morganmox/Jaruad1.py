@@ -5,6 +5,9 @@ from models import *
 #ตรงนี้อย่าซน
 SCREEN_WIDTH = 600;SCREEN_HEIGHT = 600;HEART = 0;FENCE = 0;STATUS = '';SCALE = 1;MUL = 0
 name = input("Welcome to jaruad1.py! Please enter your name.\n")
+for letter in name:
+    if letter==':':
+        name = "##INVALID_NAME##"
 difficult = input("Select a difficulty.\n(Easy/Normal/Hard/Heroic)\n").lower()
 if difficult == 'normal' or difficult == 'human':
     HEART = 300;FENCE = 5;STATUS = 'human.';MUL = 1
@@ -431,7 +434,7 @@ class SpaceGameWindow(arcade.Window):
         if self.gameover == True:
             self.finalscore = int((self.score+(self.current_lv-1)*150+(self.bossdefeat)*200)*MUL)
             text_file = open("Score.txt","a")
-            text_file.write(f"\n{self.finalscore} : {name} ({STATUS})")
+            text_file.write(f"\n{self.finalscore}:{name}({STATUS})\n")
             print("\nGame Over!")
             print("Score =",self.score)
             print("Level reached :",self.current_lv-1,"x 150 =",(self.current_lv-1)*150)
@@ -440,8 +443,9 @@ class SpaceGameWindow(arcade.Window):
             print("Final score =",self.finalscore)
             if self.bossdefeat >= 2:
                 print("Game complete! Thanks for playing.")
-                text_file.write(" [CLEARED]")
+                text_file.write("[CLEARED]")
             text_file.close()
+            import scoresort
             sys.exit()
       
     def on_key_press(self, symbol, modifiers):
