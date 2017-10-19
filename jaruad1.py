@@ -5,11 +5,12 @@ from models import *
 #ตรงนี้อย่าซน
 SCREEN_WIDTH = 600;SCREEN_HEIGHT = 600;HEART = 0;FENCE = 0;STATUS = '';SCALE = 1;MUL = 0
 difficult = input("Welcome to jaruad1.py! Please select a difficulty.\n(Easy/Normal/Hard/Heroic)\n").lower()
+name = input("Enter your name.\n")
 if difficult == 'normal' or difficult == 'human':
     HEART = 300;FENCE = 5;STATUS = 'human.';MUL = 1
 elif difficult == 'hard' or difficult == 'veteran':
     HEART = 250;FENCE = 3;STATUS = 'veteran.';MUL = 1.25
-elif difficult == 'heroic' or difficult == 'hero':
+elif difficult == 'heroic' or difficult == 'hero' or difficult == 'god':
     HEART = 150;FENCE = 1;STATUS = 'god.';MUL = 1.5
 else:
     HEART = 9999;FENCE = 999;STATUS = 'monkey.';MUL = 0.5
@@ -33,6 +34,7 @@ class SpaceGameWindow(arcade.Window):
         self.fenceproof_text = None
         self.currentbossname = ''
         self.gameover = False
+        self.finalscore = 0
         self.curse = 0
         #upgrade status
         self.upgrades_list = ['speed','auto','multi','heal','lifesteal','rapid','satanic','funnel']#upgrade list not being deployed
@@ -59,6 +61,8 @@ class SpaceGameWindow(arcade.Window):
         self.player_sprite = Ship("images/ship.png", SCALE*0.95) #spawn ตัวคนเล่น
         self.all_sprites_list.append(self.player_sprite) #ยัดตัวคนเล่นเข้าไปใน list ที่จะวาด
         print("You play as a",STATUS,"Game start with Hp =",self.hp,",Fenceproof(s) =",self.fenceproof)
+        self.sound = arcade.load_sound("nightcore.mp3")
+        arcade.play_sound(self.sound)
         
     def on_draw(self):
         arcade.start_render()
@@ -426,7 +430,11 @@ class SpaceGameWindow(arcade.Window):
             print("Level reached :",self.current_lv-1,"x 150 =",(self.current_lv-1)*150)
             print("Total boss(es) defeated :",self.bossdefeat ,"x 200 =",self.bossdefeat*200)
             print("Difficulty multiplier :",STATUS,"x",MUL)
-            print("Final score =",int((self.score+(self.current_lv-1)*150+(self.bossdefeat)*200)*MUL))
+            self.finalscore = int((self.score+(self.current_lv-1)*150+(self.bossdefeat)*200)*MUL)
+            print("Final score =",self.finalscore)
+            text_file = open("Score.txt","a")
+            text_file.write(f"\n{self.finalscore} : {name} the {STATUS}")
+            text_file.close()
             if self.bossdefeat >= 2:
                 print("Game complete! Thanks for playing.")
             sys.exit()
