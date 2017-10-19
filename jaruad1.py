@@ -434,7 +434,7 @@ class SpaceGameWindow(arcade.Window):
         if self.gameover == True:
             self.finalscore = int((self.score+(self.current_lv-1)*150+(self.bossdefeat)*200)*MUL)
             text_file = open("Score.txt","a")
-            text_file.write(f"\n{self.finalscore}:{name}({STATUS})\n")
+            text_file.write(f"\n{self.finalscore}:{name}({STATUS})")
             print("\nGame Over!")
             print("Score =",self.score)
             print("Level reached :",self.current_lv-1,"x 150 =",(self.current_lv-1)*150)
@@ -443,7 +443,9 @@ class SpaceGameWindow(arcade.Window):
             print("Final score =",self.finalscore)
             if self.bossdefeat >= 2:
                 print("Game complete! Thanks for playing.")
-                text_file.write("[CLEARED]")
+                text_file.write("[CLEARED]\n")
+            else:
+                text_file.write("\n")
             text_file.close()
             import scoresort
             sys.exit()
@@ -464,11 +466,11 @@ class SpaceGameWindow(arcade.Window):
                 shooting(1,1)
         if symbol == arcade.key.LEFT:
             self.player_sprite.vx = -1-self.speedup
-        if symbol == arcade.key.RIGHT:
+        elif symbol == arcade.key.RIGHT:
             self.player_sprite.vx = 1+self.speedup
         if symbol == arcade.key.UP:
             self.player_sprite.vy = 1+self.speedup
-        if symbol == arcade.key.DOWN:
+        elif symbol == arcade.key.DOWN:
             self.player_sprite.vy = -1-self.speedup
             
     def on_key_release(self, symbol, modifiers):
