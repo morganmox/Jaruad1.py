@@ -4,8 +4,8 @@ import sys
 from models import *
 #ตรงนี้อย่าซน
 SCREEN_WIDTH = 600;SCREEN_HEIGHT = 600;HEART = 0;FENCE = 0;STATUS = '';SCALE = 1;MUL = 0
-difficult = input("Welcome to jaruad1.py! Please select a difficulty.\n(Easy/Normal/Hard/Heroic)\n").lower()
-name = input("Enter your name.\n")
+name = input("Welcome to jaruad1.py! Please enter your name.\n")
+difficult = input("Select a difficulty.\n(Easy/Normal/Hard/Heroic)\n").lower()
 if difficult == 'normal' or difficult == 'human':
     HEART = 300;FENCE = 5;STATUS = 'human.';MUL = 1
 elif difficult == 'hard' or difficult == 'veteran':
@@ -61,8 +61,6 @@ class SpaceGameWindow(arcade.Window):
         self.player_sprite = Ship("images/ship.png", SCALE*0.95) #spawn ตัวคนเล่น
         self.all_sprites_list.append(self.player_sprite) #ยัดตัวคนเล่นเข้าไปใน list ที่จะวาด
         print("You play as a",STATUS,"Game start with Hp =",self.hp,",Fenceproof(s) =",self.fenceproof)
-        self.sound = arcade.load_sound("nightcore.mp3")
-        arcade.play_sound(self.sound)
         
     def on_draw(self):
         arcade.start_render()
@@ -101,6 +99,7 @@ class SpaceGameWindow(arcade.Window):
             elif typed == 'Versatile Tank':enemy = Enemy("images/enemyorange.png",SCALE)
             elif typed == 'Ghost Plane':enemy = Stealth("images/ghost.png", SCALE)
             elif typed == 'Balloon Tank':enemy = Enemy("images/enemy.png",SCALE)
+            elif typed == 'Black Tank':enemy = Enemy("images/enemyblack.png",SCALE)
             elif typed == 'F-22 Falcon':
                 enemy = Falcon("images/Falcon.png", SCALE)
                 enemy.soulripped = False
@@ -213,6 +212,8 @@ class SpaceGameWindow(arcade.Window):
             spawnenemy('Nasus',300,-666,350)
         if self.framecount%25==0 and self.current_lv>=13:#lv 13
             spawnenemy('Balloon Tank',20,50,35)
+        if self.framecount%150==0 and self.current_lv>=14:#lv 13
+            spawnenemy('Black Tank',11,0,100)
         #spawnenemy(ชื่อ,hp,damage เวลาชน,คะแนนที่ได้เวลาฆ่า)
             
         for enemy in self.enemy_sprites_list:#ศัตรูตัวที่มีลูกเล่นพิเศษ
@@ -305,7 +306,7 @@ class SpaceGameWindow(arcade.Window):
                     self.hp-=enemy.hp
                     enemy.kill()
                     print("Hitted by Kamikaze! Hp-",enemy.hp)
-                elif enemy.type == 'General Prayeth' or enemy.type == 'Nasus':#Fatal damage (Boss)
+                elif enemy.type == 'General Prayeth' or enemy.type == 'Nasus' or enemy.type == 'Black Tank':#Fatal damage (Boss)
                     print(enemy.type,"does fatal damage! Instant death.")
                     self.gameover = True
                 elif enemy.type == 'F-22 Falcon':#Falcon's soulrip
@@ -342,6 +343,9 @@ class SpaceGameWindow(arcade.Window):
                     enemy.width+=4;enemy.height+=4;enemy.damage+=4
                 enemy.hp-=1
                 if enemy.hp<=0:
+                    if enemy.type == 'Black Tank':
+                        self.gameover = True
+                        print("DEAD")
                     if enemy.type == 'General Prayeth' or enemy.type == 'Nasus':
                         self.current_lv+=1
                         self.BOSS = False
@@ -425,18 +429,19 @@ class SpaceGameWindow(arcade.Window):
         if self.hp <= 0:
             self.gameover = True
         if self.gameover == True:
-            print("Game Over!")
+            self.finalscore = int((self.score+(self.current_lv-1)*150+(self.bossdefeat)*200)*MUL)
+            text_file = open("Score.txt","a")
+            text_file.write(f"\n{self.finalscore} : {name} ({STATUS})")
+            print("\nGame Over!")
             print("Score =",self.score)
             print("Level reached :",self.current_lv-1,"x 150 =",(self.current_lv-1)*150)
             print("Total boss(es) defeated :",self.bossdefeat ,"x 200 =",self.bossdefeat*200)
-            print("Difficulty multiplier :",STATUS,"x",MUL)
-            self.finalscore = int((self.score+(self.current_lv-1)*150+(self.bossdefeat)*200)*MUL)
+            print("Difficulty multiplier :",STATUS,"x",MUL)     
             print("Final score =",self.finalscore)
-            text_file = open("Score.txt","a")
-            text_file.write(f"\n{self.finalscore} : {name} the {STATUS}")
-            text_file.close()
             if self.bossdefeat >= 2:
                 print("Game complete! Thanks for playing.")
+                text_file.write(" [CLEARED]")
+            text_file.close()
             sys.exit()
       
     def on_key_press(self, symbol, modifiers):

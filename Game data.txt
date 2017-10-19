@@ -131,3 +131,11 @@ Small ship = 2xFunnel (Auto pilot assistant)
 -collision damage = 50 + absorbed damagex4
 -weapon = -
 *size+4 when receive damage.
+
+14.Black Tank (score = 5500)
+-LV = 14
+-hp = 11
+-speed = 5-9
+-score worth = 100
+-collision damge = instant kill
+*Bane (kill player on death)
