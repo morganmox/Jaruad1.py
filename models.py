@@ -30,12 +30,13 @@ class Funnel(arcade.Sprite):
 class Hamtaro(arcade.Sprite):
     def __init__(self,filename,scale):
         super().__init__(filename,scale)
-        self.center_x = random.randrange(SCREEN_WIDTH-25)+25
+        self.center_x = random.randrange(SCREEN_WIDTH-30)+30
         self.center_y = SCREEN_HEIGHT
+        self.randomstop = random.randrange(80)+80
 
     def update(self):
-        if self.center_y > SCREEN_HEIGHT-135:
-            self.center_y-=1
+        if self.center_y > SCREEN_HEIGHT-self.randomstop:
+            self.center_y-=2
             
 class Seed(arcade.Sprite):
     def __init__(self,filename,scale):

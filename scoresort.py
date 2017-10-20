@@ -2,7 +2,7 @@ scores = []
 with open("Score.txt") as scoree:
     for line in scoree:
         if line!="\n":
-            score,name = line.split(':')
+            score,name = line.split(":")
             score  = int(score)
             scores.append((score,name))
 scores.sort(key=lambda s:s[0])
