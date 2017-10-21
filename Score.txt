@@ -1,2 +1,2 @@
-13480:testtest(god.)[CLEARED]
-40:##INVALID_NAME##(god.)
+13480:testtest (god.) [CLEARED]
+40:##INVALID_NAME## (god.)

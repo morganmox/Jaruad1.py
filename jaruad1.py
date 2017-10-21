@@ -435,7 +435,7 @@ class SpaceGameWindow(arcade.Window):
         if self.gameover == True:
             self.finalscore = int((self.score+(self.current_lv-1)*150+(self.bossdefeat)*200)*MUL)
             text_file = open("Score.txt","a")
-            text_file.write(f"\n{self.finalscore}:{name}({STATUS})")
+            text_file.write(f"\n{self.finalscore}:{name} ({STATUS})")
             print("\nGame Over!")
             print("Score =",self.score)
             print("Level reached :",self.current_lv-1,"x 150 =",(self.current_lv-1)*150)
@@ -444,7 +444,7 @@ class SpaceGameWindow(arcade.Window):
             print("Final score =",self.finalscore)
             if self.bossdefeat >= 2:
                 print("Game complete! Thanks for playing.")
-                text_file.write("[CLEARED]\n")
+                text_file.write(" [CLEARED]\n")
             else:
                 text_file.write("\n")
             text_file.close()
