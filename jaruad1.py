@@ -1,10 +1,7 @@
-import arcade
-import random
-import sys
-import math
+import arcade,random,sys,math
 from models import *
 from welcome import *
-SCREEN_WIDTH = 600;SCREEN_HEIGHT = 600;SCALE = 1;HEART = lives;FENCE = proof;STATUS = stat;MUL = multiply;name = yourname
+SCREEN_WIDTH = 600;SCREEN_HEIGHT = 600;SCALE = 1
 
 class SpaceGameWindow(arcade.Window):
     def __init__(self, width, height):

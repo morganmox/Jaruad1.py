@@ -1,26 +1,26 @@
-yourname = input("Welcome to jaruad1.py! Please enter your name.\n")
-for letter in yourname:
+name = input("Welcome to jaruad1.py! Please enter your name.\n")
+for letter in name:
     if letter==':':
-        yourname = "##INVALID_NAME##"
+        name = "##INVALID_NAME##"
         
 difficult = input("Select a difficulty.\n(Easy/Normal/Hard/Heroic)\n").lower()
 if difficult == 'normal' or difficult == 'human':
-    lives = 350
-    proof = 5
-    stat = 'human.'
-    multiply = 1
+    HEART = 350
+    FENCE = 5
+    STATUS = 'human.'
+    MUL = 1
 elif difficult == 'hard' or difficult == 'veteran':
-    lives = 300
-    proof = 3
-    stat = 'veteran.'
-    multiply = 1.25
+    HEART = 300
+    FENCE = 3
+    STATUS = 'veteran.'
+    MUL = 1.25
 elif difficult == 'heroic' or difficult == 'hero' or difficult == 'god':
-    lives = 200
-    proof = 1
-    stat = 'god.'
-    multiply = 1.5
+    HEART = 200
+    FENCE = 1
+    STATUS = 'god.'
+    MUL = 1.5
 else:
-    lives = 9999
-    proof = 999
-    stat = 'monkey.'
-    multiply = 0.5
+    HEART = 9999
+    FENCE = 999
+    STATUS = 'monkey.'
+    MUL = 0.5
