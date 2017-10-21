@@ -3,22 +3,9 @@ import random
 import sys
 import math
 from models import *
-#ตรงนี้อย่าซน
-SCREEN_WIDTH = 600;SCREEN_HEIGHT = 600;HEART = 0;FENCE = 0;STATUS = '';SCALE = 1;MUL = 0
-name = input("Welcome to jaruad1.py! Please enter your name.\n")
-for letter in name:
-    if letter==':':
-        name = "##INVALID_NAME##"
-difficult = input("Select a difficulty.\n(Easy/Normal/Hard/Heroic)\n").lower()
-if difficult == 'normal' or difficult == 'human':
-    HEART = 350;FENCE = 5;STATUS = 'human.';MUL = 1
-elif difficult == 'hard' or difficult == 'veteran':
-    HEART = 300;FENCE = 3;STATUS = 'veteran.';MUL = 1.25
-elif difficult == 'heroic' or difficult == 'hero' or difficult == 'god':
-    HEART = 200;FENCE = 1;STATUS = 'god.';MUL = 1.5
-else:
-    HEART = 9999;FENCE = 999;STATUS = 'monkey.';MUL = 0.5
-    
+from welcome import *
+SCREEN_WIDTH = 600;SCREEN_HEIGHT = 600;SCALE = 1;HEART = lives;FENCE = proof;STATUS = stat;MUL = multiply;name = yourname
+
 class SpaceGameWindow(arcade.Window):
     def __init__(self, width, height):
         super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT)
