@@ -112,7 +112,7 @@ Small ship = 2xFunnel (Auto pilot assistant)
 -collision damage = 5
 -weapon = 1.Bullet (speed = 2++,damage = 4) 2.Thorn (reflect damage)
 
-12.Nasus (score = 4500)
+12.BOSS : Nasus (score = 4500)
 -LV = 12
 -hp = 300
 -speed = 3
@@ -121,10 +121,10 @@ Small ship = 2xFunnel (Auto pilot assistant)
 -weapon = Cane (speed = 18,damage = 6+stack)
 *+3 stack per player hit.
 -ultimate = Fury of the sand (hp<50)
-	-hp +300
-	-size += w30:h40
-	-drain 5%hp+1 per 40 frame (heal nasus = 5)
-	-firedelay -20
+  -hp +300
+  -size += w30:h40
+  -drain 5%hp+1 per 40 frame (heal nasus = 5)
+  -firedelay -20
 
 13.Balloon Tank (boss 2 defeated)
 -LV = 13
@@ -137,8 +137,20 @@ Small ship = 2xFunnel (Auto pilot assistant)
 
 14.Black Tank (score = 5500)
 -LV = 14
--hp = 25
+-hp = 35
 -speed = 5-9
 -score worth = 100
 -collision damge = instant kill
-*Bane (kill player on death)
+-weapon = Bane (kill player on death)
+
+15.BOSS : Time Wizard (score = 6500)
+-LV = 15
+-hp = 800
+-speed = 3
+-score worth = 600
+-collision damage = instant kill
+-weapon = Knife (speed = 8,damage = 7)
+*aim at player
+-skill : Time stop (affect player only)
+-ultimate : The world (hp<600)
+  -throw 20 knives (speed = 8,damage = 5) from random position (aim at player)

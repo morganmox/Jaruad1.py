@@ -9,7 +9,7 @@ class SpaceGameWindow(arcade.Window):
         arcade.set_background_color(arcade.color.AMAZON)
         self.framecount = 0
         #scoring/starting hp/gameover status
-        self.score_list = [30,100,300,500,1000,1400,2000,2800,3800,4500,5500,10000000]
+        self.score_list = [30,100,300,500,1000,1400,2000,2800,3800,4500,5500,6500,10000000]
         self.hp = HEART
         self.hp_text = None
         self.score = 0
@@ -24,6 +24,7 @@ class SpaceGameWindow(arcade.Window):
         self.gameover = False
         self.finalscore = 0
         self.curse = 0
+        self.timestop = 0
         #upgrade status
         self.upgrades_list = ['speed','auto','multi','heal','lifesteal','rapid','satanic','funnel']#upgrade list not being deployed
         self.speedup = 0
@@ -34,7 +35,7 @@ class SpaceGameWindow(arcade.Window):
         self.lifesteal = False
         self.funnel = False
         #boss status
-        self.boss_list = ['prayed','nasus']
+        self.boss_list = ['prayed','nasus','timewizard']
         self.bossdefeat = 0
         self.BOSS = False
         self.nasusstack = 6
@@ -98,15 +99,14 @@ class SpaceGameWindow(arcade.Window):
             elif typed == 'Balloon Tank':enemy = Enemy("images/enemy.png",SCALE)
             elif typed == 'Black Tank':enemy = Enemy("images/enemyblack.png",SCALE)
             elif typed == 'Jaruad2.py':enemy = Hamtaro("images/ship2.png",SCALE*0.95)
-            elif typed == 'F-22 Falcon':
-                enemy = Falcon("images/Falcon.png", SCALE)
-                enemy.soulripped = False
-            elif typed == 'General Prayeth' or typed == 'Nasus':
+            elif typed == 'F-22 Falcon':enemy = Falcon("images/Falcon.png", SCALE);enemy.soulripped = False
+            elif typed == 'General Prayeth' or typed == 'Nasus' or typed == 'Sakuya Izayoi':
                 if typed == 'General Prayeth':
                     enemy = BOSS("images/prayed.png", SCALE)
+                elif typed == 'Sakuya Izayoi':
+                    enemy = BOSS("images/sakuya.png",SCALE);enemy.ultimate = False
                 else:
-                    enemy = BOSS("images/nasus.png", SCALE)
-                    enemy.ultimate = False
+                    enemy = BOSS("images/nasus.png", SCALE);enemy.ultimate = False
                 self.BOSS = True
                 self.currentbossname = typed
                 print("BOSS incoming!",typed,".")
@@ -115,12 +115,8 @@ class SpaceGameWindow(arcade.Window):
                 enemy = Redbullet("images/nuclear.png",SCALE)
                 enemy.center_x = random.randrange(SCREEN_WIDTH-30)+30
                 enemy.center_y = SCREEN_HEIGHT
-            enemy.type = typed
-            enemy.hp = hp
-            enemy.damage = damage
-            enemy.worth = worth
-            self.enemy_sprites_list.append(enemy)
-            self.all_sprites_list.append(enemy)
+            enemy.type = typed;enemy.hp = hp;enemy.damage = damage;enemy.worth = worth
+            self.enemy_sprites_list.append(enemy);self.all_sprites_list.append(enemy)
         
         def enemyshoot(host,typed,damage):
             if host == 'Elite Tank' or host == 'General Prayeth' or host == 'Versatile Tank':enemybullet = Redbullet("images/bulletenemy.png", SCALE*0.9)
@@ -136,46 +132,43 @@ class SpaceGameWindow(arcade.Window):
                     enemybullet.type = typed
                     self.enemy_bullet_sprites_list.append(enemybullet)
                     self.all_sprites_list.append(enemybullet)
-            elif host == 'Jaruad2.py':#aim at player
-                enemybullet = arcade.Sprite("images/bulletenemy.png",SCALE*0.9)
+            elif host == 'Jaruad2.py' or host == 'Sakuya Izayoi':#aim at player
+                if host == 'Jaruad2.py':
+                    enemybullet = arcade.Sprite("images/bulletenemy.png",SCALE*0.9);enemybullet.center_y = enemy.center_y;enemybullet.center_x = enemy.center_x
+                else:#sakuya
+                    enemybullet = arcade.Sprite("images/knife.png",SCALE)
+                    if typed == 'Knife':enemybullet.center_x = enemy.center_x;enemybullet.center_y = enemy.bottom
+                    else:enemybullet.center_x = random.randrange(SCREEN_WIDTH+60)-60;enemybullet.center_y = random.randrange(SCREEN_HEIGHT+60)-60
                 enemybullet.damage = damage
                 enemybullet.type = typed
-                enemybullet.center_x = enemy.center_x
-                enemybullet.center_y = enemy.center_y
-                enemybullet.angle = math.degrees(math.atan2(self.player_sprite.center_y-enemy.center_y,self.player_sprite.center_x-enemy.center_x))
-                enemybullet.change_x = math.cos(math.atan2(self.player_sprite.center_y-enemy.center_y,self.player_sprite.center_x-enemy.center_x))*8
-                enemybullet.change_y = math.sin(math.atan2(self.player_sprite.center_y-enemy.center_y,self.player_sprite.center_x-enemy.center_x))*8
+                enemybullet.angle = math.degrees(math.atan2(self.player_sprite.center_y-enemybullet.center_y,self.player_sprite.center_x-enemybullet.center_x))
+                enemybullet.change_x = math.cos(math.atan2(self.player_sprite.center_y-enemybullet.center_y,self.player_sprite.center_x-enemybullet.center_x))*8
+                enemybullet.change_y = math.sin(math.atan2(self.player_sprite.center_y-enemybullet.center_y,self.player_sprite.center_x-enemybullet.center_x))*8
                 self.enemy_bullet_sprites_list.append(enemybullet)
                 self.all_sprites_list.append(enemybullet)
             else:#typical (1 bullet)
-                enemybullet.center_x = enemy.center_x
-                enemybullet.top = enemy.bottom
-                enemybullet.damage = damage
-                enemybullet.type = typed
-                self.enemy_bullet_sprites_list.append(enemybullet)
-                self.all_sprites_list.append(enemybullet)
+                enemybullet.center_x = enemy.center_x;enemybullet.top = enemy.bottom
+                enemybullet.damage = damage;enemybullet.type = typed
+                self.enemy_bullet_sprites_list.append(enemybullet);self.all_sprites_list.append(enemybullet)
             
         def upgrade(typed,images,mul):
             upgrade = Greenfoot(images, SCALE*mul)
             upgrade.type = typed
-            self.upgrade_sprites_list.append(upgrade)
-            self.all_sprites_list.append(upgrade)
+            self.upgrade_sprites_list.append(upgrade);self.all_sprites_list.append(upgrade)
             
-        self.all_sprites_list.update()
-        self.framecount+=1
+        self.all_sprites_list.update();self.framecount+=1
 
         if self.score>=self.score_list[0]:#levelup
-            self.score_list.pop(0)
-            self.current_lv+=1
+            self.score_list.pop(0);self.current_lv+=1
         
-        if self.framecount%75==0: #รั้วลวดหนาม
+        if self.framecount%75==0 and self.currentbossname != 'Sakuya Izayoi': #รั้วลวดหนาม
             fence = Torpedo("images/fence.png", 1.2)
             fence.center_y = SCREEN_HEIGHT
             fence.center_x = random.randrange(SCREEN_WIDTH)+20
             self.fence_sprites_list.append(fence)
             self.all_sprites_list.append(fence)
 
-        if self.framecount%150==0 and self.BOSS==False and STATUS!='monkey.':
+        if self.framecount%160==0 and self.BOSS==False and STATUS!='monkey.':
             spawnenemy('Jaruad2.py',self.current_lv*2,self.current_lv*2,self.current_lv*2)
         if self.framecount%12==0 and self.current_lv<=6:#lv 1-6
             spawnenemy('Vanilla Tank',1,1,1)
@@ -186,8 +179,7 @@ class SpaceGameWindow(arcade.Window):
         if self.framecount%150==0 and self.current_lv>=4 and self.current_lv<=9:#lv 4-9
             spawnenemy('Elite Tank',9,2,5)
         if self.current_lv>=5 and 'prayed' in self.boss_list:#BOSS (lv 5)
-            self.boss_list.remove('prayed')
-            spawnenemy('General Prayeth',150,-666,44)
+            self.boss_list.remove('prayed');spawnenemy('General Prayeth',150,-666,44)
         if self.BOSS == True and self.currentbossname == 'General Prayeth' and self.framecount%40==0:#Prayeth's weapon
             spawnenemy('nuclear',6,3,0)
         if self.framecount%180==0 and self.current_lv>=6 and self.bossdefeat >=1 and self.current_lv<=10:#lv 6-10
@@ -200,56 +192,56 @@ class SpaceGameWindow(arcade.Window):
             spawnenemy('Plague Tank',10,10,10)
         if self.framecount%21==0 and self.current_lv>=9 and self.current_lv<=13 and self.BOSS == False:#curse dps
             self.hp-=self.curse;print("You are cursed! Hp-",self.curse);self.curse = 0
-        if self.framecount%180==0 and self.current_lv>=10 and self.current_lv<=14 and self.BOSS==False:#lv 10-14(-boss2)
+        if self.framecount%180==0 and self.current_lv>=10 and self.BOSS==False:#lv 10-14(-boss2)
             spawnenemy('Xhamster',30,5,30)
         if self.framecount%20==0 and self.current_lv==11:#lv 11
             spawnenemy('Versatile Tank',15,5,25)
         if self.current_lv>=12 and 'nasus' in self.boss_list:#BOSS (lv 12)
-            self.boss_list.remove('nasus')
-            spawnenemy('Nasus',300,-666,350)
-        if self.framecount%25==0 and self.current_lv>=13:#lv 13
+            self.boss_list.remove('nasus');spawnenemy('Nasus',300,-666,350)
+        if self.framecount%40==0 and self.current_lv>=13 and self.BOSS==False:#lv 13
             spawnenemy('Balloon Tank',20,50,35)
-        if self.framecount%150==0 and self.current_lv>=14:#lv 14
-            spawnenemy('Black Tank',25,0,100)
+        if self.framecount%170==0 and self.current_lv>=14 and self.BOSS==False:#lv 14
+            spawnenemy('Black Tank',35,-666,100)
+        if 'timewizard' in self.boss_list and self.current_lv>=15:#BOSS (LV 15)
+            self.boss_list.remove('timewizard');spawnenemy('Sakuya Izayoi',800,-666,600);self.hp = 350
         #spawnenemy(ชื่อ,hp,damage เวลาชน,คะแนนที่ได้เวลาฆ่า)
             
         for enemy in self.enemy_sprites_list:#ศัตรูตัวที่มีลูกเล่นพิเศษ
             if enemy.type == 'Elite Tank':
-                if self.framecount%40==0:
-                    enemyshoot('Elite Tank','Bullet',1)
+                if self.framecount%40==0:enemyshoot('Elite Tank','Bullet',1)
             elif enemy.type == 'Submarine':
-                if random.randrange(100)<2:
-                    enemyshoot('Submarine','Torpedo',1)
+                if random.randrange(100)<2:enemyshoot('Submarine','Torpedo',1)
             elif enemy.type == 'General Prayeth':
-                if self.framecount%25==0:
-                    enemyshoot('General Prayeth','Pistol',2)
+                if self.framecount%25==0:enemyshoot('General Prayeth','Pistol',2)
             elif enemy.type == 'F-22 Falcon':
-                if self.framecount%20==0:
-                    enemyshoot('F-22 Falcon','Ruin king',1)
+                if self.framecount%20==0:enemyshoot('F-22 Falcon','Ruin king',1)
             elif enemy.type == 'Plague Tank':
-                if self.framecount%21==0:
-                    self.curse+=1
+                if self.framecount%21==0:self.curse+=1
             elif enemy.type == 'Xhamster':
-                if self.framecount%21==0:
-                    enemyshoot('Xhamster','Hamster shit',2)
+                if self.framecount%21==0:enemyshoot('Xhamster','Hamster shit',2)
             elif enemy.type == 'Versatile Tank':
-                if self.framecount%20==0:
-                    enemyshoot('Versatile Tank','Bullet',4)
+                if self.framecount%20==0:enemyshoot('Versatile Tank','Bullet',4)
             elif enemy.type == 'Jaruad2.py':
                 enemy.angle = math.degrees(math.atan2(self.player_sprite.center_y-enemy.center_y,self.player_sprite.center_x-enemy.center_x))-90
-                if random.randrange(75)<1:
-                    enemyshoot('Jaruad2.py','Bullet',self.current_lv)
+                if random.randrange(75)<1:enemyshoot('Jaruad2.py','Bullet',self.current_lv)
             elif enemy.type == 'Nasus':
                 if enemy.ultimate == False:
-                    if self.framecount%40==0:
-                        enemyshoot('Nasus','Cane',self.nasusstack)
+                    if self.framecount%40==0:enemyshoot('Nasus','Cane',self.nasusstack)
                 else:
-                    if self.framecount%20==0:
-                        enemyshoot('Nasus','Cane',self.nasusstack)
-                    if self.framecount%40==0:
-                        self.hp = int(self.hp*95/100)-1
-                        enemy.hp+=5
-                        self.boss_hp+=5
+                    if self.framecount%20==0:enemyshoot('Nasus','Cane',self.nasusstack)
+                    if self.framecount%40==0:self.hp = int(self.hp*95/100)-1;enemy.hp+=5;self.boss_hp+=5
+            elif enemy.type == 'Sakuya Izayoi':
+                self.timestop-=1
+                if self.framecount%12==0:enemyshoot('Sakuya Izayoi','Knife',7)
+                if self.framecount%150==0:
+                    self.player_sprite.vx = 0;self.player_sprite.vy = 0
+                    if enemy.ultimate == True:
+                        self.timestop = 25
+                        for i in range(20):enemyshoot('Sakuya Izayoi','Random Knife',5)
+                    else:self.timestop = 50
+                    print("Time Freeze!")
+                if self.timestop>0:arcade.set_background_color(arcade.color.BLACK)
+                else:arcade.set_background_color(arcade.color.AMAZON)        
         #enemyshoot(ชื่อคนยิง,ชื่อกระสุน,damage ตอนโดน)
 
         if self.funnel == True:#funnel ยิง
@@ -258,7 +250,7 @@ class SpaceGameWindow(arcade.Window):
                     self.shooting(funnel,1,"images/falconbullet.png",0.7,1,1)
 
         if self.automatic == True:#เปิดยิง auto
-            if self.framecount%self.firedelay==0:
+            if self.framecount%self.firedelay==0 and self.timestop<1:
                 if self.multigun == True:#เปิดยิง 3 ลูก
                     self.shooting(self.player_sprite,0,"images/bullet.png",0.9,3,0)
                 else :#no upgrade
@@ -289,7 +281,7 @@ class SpaceGameWindow(arcade.Window):
         if self.score>=3800 and 'satanic' in self.upgrades_list:
             self.upgrades_list.remove('satanic') #improve lifesteal
             upgrade('SATANIC',"images/d6.png",1)
-        if self.current_lv>=4 and 'funnel' in self.upgrades_list:
+        if 'funnel' in self.upgrades_list and self.current_lv>=4:
             self.upgrades_list.remove('funnel')
             upgrade('funnel',"images/ship.png",0.55)
 
@@ -298,27 +290,23 @@ class SpaceGameWindow(arcade.Window):
         if len(hit)!=0:
             for enemy in hit:
                 if enemy.type == 'Submarine':#do nothing
-                    print("Submarine is harmless.")
+                    self.hp-=0
                 elif enemy.type == 'Ghost Plane':#lifesteal
                     if self.framecount%5==0:
-                        enemy.hp+=1
-                        self.hp-=1
+                        enemy.hp+=1;self.hp-=1
                 elif enemy.type == 'Kamikaze':#damage = remaining hp
-                    self.hp-=enemy.hp
-                    enemy.kill()
+                    self.hp-=enemy.hp;enemy.kill()
                     print("Hitted by Kamikaze! Hp-",enemy.hp)
-                elif enemy.type == 'General Prayeth' or enemy.type == 'Nasus' or enemy.type == 'Black Tank':#Fatal damage (Boss)
+                elif enemy.damage == -666:#Fatal damage
                     print(enemy.type,"does fatal damage! Instant death.")
                     self.gameover = True
                 elif enemy.type == 'F-22 Falcon':#Falcon's soulrip
                     if enemy.soulripped == False:
                         enemy.soulripped = True
                         if self.hp > 50:
-                            self.hp = int(self.hp/2)
-                            print("Heavy damage from F-22 Falcon! Hp halved.")
+                            self.hp = int(self.hp/2);print("Heavy damage from F-22 Falcon! Hp halved.")
                         else :
-                            print("Heavy damage from F-22 Falcon! Instant kill.(Hp<=50)")
-                            self.gameover = True
+                            print("Heavy damage from F-22 Falcon! Instant kill.(Hp<=50)");self.gameover = True
                 else:
                     self.hp-=enemy.damage
                     print("Hitted by",enemy.type,"! Hp-",enemy.damage)
@@ -332,12 +320,13 @@ class SpaceGameWindow(arcade.Window):
                     self.hp+=self.leechamount
                 bullet.kill()
             for enemy in hit2:
-                if enemy.type == 'General Prayeth' or enemy.type == 'Nasus':#boss hp display
+                if enemy.type == 'General Prayeth' or enemy.type == 'Nasus' or enemy.type == 'Sakuya Izayoi':#boss hp display
                     self.boss_hp-=1
                     if enemy.type == 'Nasus':
                         if enemy.ultimate == False and enemy.hp<=50:#nasus ulti
-                            enemy.ultimate = True;enemy.width+=30;enemy.height+=40;enemy.hp +=300;self.boss_hp +=300
-                            print("Nasus activate fury of the sand!")
+                            enemy.ultimate = True;enemy.width+=30;enemy.height+=40;enemy.hp +=300;self.boss_hp +=300;print("Nasus activate fury of the sand!")
+                    elif enemy.type == 'Sakuya Izayoi' and enemy.hp<=600:
+                        if enemy.ultimate == False:enemy.ultimate = True
                 elif (enemy.type == 'Thorn Tank' or enemy.type == 'Versatile Tank') and bullet.type == 0:
                     self.hp-=1
                 elif enemy.type == 'Balloon Tank':
@@ -347,10 +336,8 @@ class SpaceGameWindow(arcade.Window):
                     if enemy.type == 'Black Tank':
                         self.gameover = True
                         print("Black Tank dragged player down to grave!")
-                    if enemy.type == 'General Prayeth' or enemy.type == 'Nasus':
-                        self.current_lv+=1
-                        self.BOSS = False
-                        self.bossdefeat+=1
+                    if enemy.type == 'General Prayeth' or enemy.type == 'Nasus' or enemy.type == 'Sakuya Izayoi':#BOSS down
+                        self.current_lv+=1;self.currentbossname = '';self.BOSS = False;self.bossdefeat+=1;self.timestop = 0;arcade.set_background_color(arcade.color.AMAZON)
                     self.score+=enemy.worth
                     print(enemy.type,"has been killed. score+",enemy.worth)
                     enemy.kill()
@@ -360,27 +347,20 @@ class SpaceGameWindow(arcade.Window):
         if len(hit3)!=0:
             for upgrade in hit3:
                 if upgrade.type == 'Auto':
-                    self.automatic = True
-                    print("Automatic activated!")
+                    self.automatic = True;print("Automatic activated!")
                 elif upgrade.type == 'Speed':
-                    self.speedup+=0.6
-                    print("Speed up!")
+                    self.speedup+=0.6;print("Speed up!")
                 elif upgrade.type == 'Multi':
-                    self.multigun = True
-                    print("Triple shot activated!")
+                    self.multigun = True;print("Triple shot activated!")
                 elif upgrade.type == 'Lifesteal':
-                    self.lifesteal = True
-                    print("Lifesteal activated!")
+                    self.lifesteal = True;print("Lifesteal activated!")
                 elif upgrade.type == 'Gatling':
                     if self.firedelay>1:
-                        self.firedelay-=2
-                    print("Firerate increased!")
+                        self.firedelay-=2;print("Firerate increased!")
                 elif upgrade.type == 'Heal':
-                    self.hp +=HEART-50
-                    print("Heal! hp+",HEART-50)
+                    self.hp +=HEART-50;print("Heal! hp+",HEART-50)
                 elif upgrade.type == 'SATANIC':
-                    self.leechamount+=1
-                    print("Lifessteal increased!")
+                    self.leechamount+=1;print("Lifessteal increased!")
                 elif upgrade.type == 'funnel':
                     self.funnel = True
                     print("You got some assistants!")
@@ -396,13 +376,11 @@ class SpaceGameWindow(arcade.Window):
             if self.fenceproof >0:
                 for fence in hit4:
                     fence.kill()
-                self.fenceproof -=1
-                print("You used your fenceproof!")
+                self.fenceproof -=1;print("You used your fenceproof!")
             else:
-                print("Fence does fatal damage! Instant death.")
-                self.gameover = True
+                print("Fence does fatal damage! Instant death.");self.gameover = True
 
-        #collision checking 5 (player vs enemybullet)
+        #collision checking 5 (player vs enemy bullet)
         hit5 = arcade.check_for_collision_with_list(self.player_sprite,self.enemy_bullet_sprites_list)
         if len(hit5)!=0:
             for enemybullet in hit5:
@@ -442,35 +420,26 @@ class SpaceGameWindow(arcade.Window):
             print("Total boss(es) defeated :",self.bossdefeat ,"x 200 =",self.bossdefeat*200)
             print("Difficulty multiplier :",STATUS,"x",MUL)     
             print("Final score =",self.finalscore)
-            if self.bossdefeat >= 2:
-                print("Game complete! Thanks for playing.")
-                text_file.write(" [CLEARED]\n")
-            else:
-                text_file.write("\n")
+            if self.bossdefeat >= 3:print("Game complete! Thanks for playing.");text_file.write(" [CLEARED]\n")
+            else:text_file.write("\n")
             text_file.close()
             import scoresort
             sys.exit(0)
       
     def on_key_press(self, symbol, modifiers):
-        if symbol == arcade.key.SPACE and self.automatic == False:
+        if symbol == arcade.key.SPACE and self.automatic == False and self.timestop<1:
             if self.multigun == True:#เปิดยิง 3 ลูก
                 self.shooting(self.player_sprite,0,"images/bullet.png",0.9,3,0)
             else :#no upgrade
                 self.shooting(self.player_sprite,0,"images/bullet.png",0.9,1,1)
-        if symbol == arcade.key.LEFT:
-            self.player_sprite.vx = -1-self.speedup
-        if symbol == arcade.key.RIGHT:
-            self.player_sprite.vx = 1+self.speedup
-        if symbol == arcade.key.UP:
-            self.player_sprite.vy = 1+self.speedup
-        if symbol == arcade.key.DOWN:
-            self.player_sprite.vy = -1-self.speedup
+        if symbol == arcade.key.LEFT and self.timestop<1:self.player_sprite.vx = -1-self.speedup
+        if symbol == arcade.key.RIGHT and self.timestop<1:self.player_sprite.vx = 1+self.speedup
+        if symbol == arcade.key.UP and self.timestop<1:self.player_sprite.vy = 1+self.speedup
+        if symbol == arcade.key.DOWN and self.timestop<1:self.player_sprite.vy = -1-self.speedup
             
     def on_key_release(self, symbol, modifiers):
-        if symbol == arcade.key.LEFT or symbol == arcade.key.RIGHT:
-            self.player_sprite.vx = 0
-        elif symbol == arcade.key.UP or symbol == arcade.key.DOWN:
-            self.player_sprite.vy = 0
+        if symbol == arcade.key.LEFT or symbol == arcade.key.RIGHT:self.player_sprite.vx = 0
+        elif symbol == arcade.key.UP or symbol == arcade.key.DOWN:self.player_sprite.vy = 0
      
 if __name__ == '__main__':
     window = SpaceGameWindow(SCREEN_WIDTH, SCREEN_HEIGHT)
