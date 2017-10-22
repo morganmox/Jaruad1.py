@@ -39,6 +39,7 @@ class SpaceGameWindow(arcade.Window):
         self.bossdefeat = 0
         self.BOSS = False
         self.nasusstack = 6
+        self.tmp = 0
         #สร้างที่เก็บของแต่ละอย่างไว้ check collision
         self.all_sprites_list = arcade.SpriteList() #เก็บทุกอย่างไว้สั่งวาดทุกอย่างในคำสั่งเดียว
         self.bullet_sprites_list = arcade.SpriteList() #player bullet
@@ -104,7 +105,7 @@ class SpaceGameWindow(arcade.Window):
                 if typed == 'General Prayeth':
                     enemy = BOSS("images/prayed.png", SCALE)
                 elif typed == 'Sakuya Izayoi':
-                    enemy = BOSS("images/sakuya.png",SCALE);enemy.ultimate = False
+                    enemy = BOSS("images/sakuya.png",SCALE);enemy.ultimate = False;enemy.second = False
                 else:
                     enemy = BOSS("images/nasus.png", SCALE);enemy.ultimate = False
                 self.BOSS = True
@@ -135,17 +136,32 @@ class SpaceGameWindow(arcade.Window):
             elif host == 'Jaruad2.py' or host == 'Sakuya Izayoi':#aim at player
                 if host == 'Jaruad2.py':
                     enemybullet = arcade.Sprite("images/bulletenemy.png",SCALE*0.9);enemybullet.center_y = enemy.center_y;enemybullet.center_x = enemy.center_x
-                else:#sakuya
-                    enemybullet = arcade.Sprite("images/knife.png",SCALE)
-                    if typed == 'Knife':enemybullet.center_x = enemy.center_x;enemybullet.center_y = enemy.bottom
-                    else:enemybullet.center_x = random.randrange(SCREEN_WIDTH+60)-60;enemybullet.center_y = random.randrange(SCREEN_HEIGHT+60)-60
-                enemybullet.damage = damage
-                enemybullet.type = typed
-                enemybullet.angle = math.degrees(math.atan2(self.player_sprite.center_y-enemybullet.center_y,self.player_sprite.center_x-enemybullet.center_x))
-                enemybullet.change_x = math.cos(math.atan2(self.player_sprite.center_y-enemybullet.center_y,self.player_sprite.center_x-enemybullet.center_x))*8
-                enemybullet.change_y = math.sin(math.atan2(self.player_sprite.center_y-enemybullet.center_y,self.player_sprite.center_x-enemybullet.center_x))*8
-                self.enemy_bullet_sprites_list.append(enemybullet)
-                self.all_sprites_list.append(enemybullet)
+                    enemybullet.angle = math.degrees(math.atan2(self.player_sprite.center_y-enemybullet.center_y,self.player_sprite.center_x-enemybullet.center_x))
+                    enemybullet.change_x = math.cos(math.atan2(self.player_sprite.center_y-enemybullet.center_y,self.player_sprite.center_x-enemybullet.center_x))*8
+                    enemybullet.change_y = math.sin(math.atan2(self.player_sprite.center_y-enemybullet.center_y,self.player_sprite.center_x-enemybullet.center_x))*8
+                elif host == 'Sakuya Izayoi':#sakuya
+                    if typed == 'Knife' or typed == 'Random Knife':
+                        if typed == 'Knife':
+                            enemybullet = arcade.Sprite("images/knife.png",SCALE)
+                            enemybullet.center_x = enemy.center_x
+                            enemybullet.center_y = enemy.bottom
+                        else:#random knife
+                            enemybullet = arcade.Sprite("images/knife3.png",SCALE)
+                            enemybullet.center_x = random.randrange(SCREEN_WIDTH-5)+5
+                            enemybullet.center_y = random.randrange(SCREEN_HEIGHT-5)+5
+                        enemybullet.angle = math.degrees(math.atan2(self.player_sprite.center_y-enemybullet.center_y,self.player_sprite.center_x-enemybullet.center_x))
+                        enemybullet.change_x = math.cos(math.atan2(self.player_sprite.center_y-enemybullet.center_y,self.player_sprite.center_x-enemybullet.center_x))*8
+                        enemybullet.change_y = math.sin(math.atan2(self.player_sprite.center_y-enemybullet.center_y,self.player_sprite.center_x-enemybullet.center_x))*8
+                    else:
+                        enemybullet = arcade.Sprite("images/knife2.png",SCALE)
+                        enemybullet.center_y = enemy.center_y
+                        enemybullet.center_x = enemy.center_x
+                        enemybullet.angle = math.degrees(self.tmp*9)
+                        enemybullet.change_x = math.cos(self.tmp*9)*8
+                        enemybullet.change_y = math.sin(self.tmp*9)*8
+                        self.tmp+=1
+                enemybullet.damage = damage;enemybullet.type = typed
+                self.enemy_bullet_sprites_list.append(enemybullet);self.all_sprites_list.append(enemybullet)
             else:#typical (1 bullet)
                 enemybullet.center_x = enemy.center_x;enemybullet.top = enemy.bottom
                 enemybullet.damage = damage;enemybullet.type = typed
@@ -186,24 +202,24 @@ class SpaceGameWindow(arcade.Window):
             spawnenemy('Thorn Tank',15,6,20)
         if self.framecount%30==0 and self.current_lv>=7 and self.current_lv<=11 and self.bossdefeat >=1:#lv 7-11
             spawnenemy('Ghost Plane',8,1,10)
-        if self.framecount%40==0 and self.current_lv>=8 and self.BOSS==False:#lv 8++(-boss2)
+        if self.framecount%45==0 and self.current_lv>=8 and self.BOSS==False:#lv 8++(-boss2)
             spawnenemy('F-22 Falcon',12,0,20)
         if self.framecount%25==0 and self.current_lv>=9 and self.current_lv<=13 and self.BOSS == False:#lv 9-13(-boss2)
             spawnenemy('Plague Tank',10,10,10)
         if self.framecount%21==0 and self.current_lv>=9 and self.current_lv<=13 and self.BOSS == False:#curse dps
             self.hp-=self.curse;print("You are cursed! Hp-",self.curse);self.curse = 0
         if self.framecount%180==0 and self.current_lv>=10 and self.BOSS==False:#lv 10-14(-boss2)
-            spawnenemy('Xhamster',30,5,30)
+            spawnenemy('Xhamster',25,5,30)
         if self.framecount%20==0 and self.current_lv==11:#lv 11
             spawnenemy('Versatile Tank',15,5,25)
         if self.current_lv>=12 and 'nasus' in self.boss_list:#BOSS (lv 12)
             self.boss_list.remove('nasus');spawnenemy('Nasus',300,-666,350)
         if self.framecount%40==0 and self.current_lv>=13 and self.BOSS==False:#lv 13
-            spawnenemy('Balloon Tank',20,50,35)
+            spawnenemy('Balloon Tank',20,25,35)
         if self.framecount%170==0 and self.current_lv>=14 and self.BOSS==False:#lv 14
             spawnenemy('Black Tank',35,-666,100)
         if 'timewizard' in self.boss_list and self.current_lv>=15:#BOSS (LV 15)
-            self.boss_list.remove('timewizard');spawnenemy('Sakuya Izayoi',800,-666,600);self.hp = 350
+            self.boss_list.remove('timewizard');spawnenemy('Sakuya Izayoi',500,-666,600);self.hp = 750
         #spawnenemy(ชื่อ,hp,damage เวลาชน,คะแนนที่ได้เวลาฆ่า)
             
         for enemy in self.enemy_sprites_list:#ศัตรูตัวที่มีลูกเล่นพิเศษ
@@ -232,12 +248,17 @@ class SpaceGameWindow(arcade.Window):
                     if self.framecount%40==0:self.hp = int(self.hp*95/100)-1;enemy.hp+=5;self.boss_hp+=5
             elif enemy.type == 'Sakuya Izayoi':
                 self.timestop-=1
-                if self.framecount%12==0:enemyshoot('Sakuya Izayoi','Knife',7)
+                if self.framecount%12==0:enemyshoot('Sakuya Izayoi','Knife',5)
+                if enemy.second == True and self.framecount%70 == 0:
+                    for i in range(30):
+                        enemyshoot('Sakuya Izayoi','Knif3',5)
+                    self.tmp = 0
                 if self.framecount%150==0:
                     self.player_sprite.vx = 0;self.player_sprite.vy = 0
                     if enemy.ultimate == True:
                         self.timestop = 25
-                        for i in range(20):enemyshoot('Sakuya Izayoi','Random Knife',5)
+                        for i in range(20):
+                            enemyshoot('Sakuya Izayoi','Random Knife',5)
                     else:self.timestop = 50
                     print("Time Freeze!")
                 if self.timestop>0:arcade.set_background_color(arcade.color.BLACK)
@@ -325,8 +346,9 @@ class SpaceGameWindow(arcade.Window):
                     if enemy.type == 'Nasus':
                         if enemy.ultimate == False and enemy.hp<=50:#nasus ulti
                             enemy.ultimate = True;enemy.width+=30;enemy.height+=40;enemy.hp +=300;self.boss_hp +=300;print("Nasus activate fury of the sand!")
-                    elif enemy.type == 'Sakuya Izayoi' and enemy.hp<=600:
+                    elif enemy.type == 'Sakuya Izayoi' and enemy.hp<=400:
                         if enemy.ultimate == False:enemy.ultimate = True
+                        if enemy.hp<=200 and enemy.second == False:enemy.second = True;enemy.hp +=300;self.boss_hp +=300;enemy.texture = arcade.load_texture("images/sakuya2.png")
                 elif (enemy.type == 'Thorn Tank' or enemy.type == 'Versatile Tank') and bullet.type == 0:
                     self.hp-=1
                 elif enemy.type == 'Balloon Tank':

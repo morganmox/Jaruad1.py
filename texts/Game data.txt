@@ -98,7 +98,7 @@ Small ship = 2xFunnel (Auto pilot assistant)
 
 10.Xhamster (score = 2800)
 -LV = 10
--hp = 30
+-hp = 25
 -speed = 2
 -score worth = 30
 -collision damage = 5
@@ -131,7 +131,7 @@ Small ship = 2xFunnel (Auto pilot assistant)
 -hp = 20
 -speed = 5-9
 -score worth = 35
--collision damage = 50 + absorbed damagex4
+-collision damage = 25 + absorbed damagex4
 -weapon = -
 *size+4 when receive damage.
 
@@ -143,14 +143,5 @@ Small ship = 2xFunnel (Auto pilot assistant)
 -collision damge = instant kill
 -weapon = Bane (kill player on death)
 
-15.BOSS : Time Wizard (score = 6500)
--LV = 15
--hp = 800
--speed = 3
--score worth = 600
--collision damage = instant kill
--weapon = Knife (speed = 8,damage = 7)
-*aim at player
--skill : Time stop (affect player only)
--ultimate : The world (hp<600)
-  -throw 20 knives (speed = 8,damage = 5) from random position (aim at player)
+15.BOSS : Time Witch (score = 6500)
+???
