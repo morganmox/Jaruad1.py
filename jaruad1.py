@@ -166,7 +166,11 @@ class SpaceGameWindow(arcade.Window):
                 enemybullet.center_x = enemy.center_x;enemybullet.top = enemy.bottom
                 enemybullet.damage = damage;enemybullet.type = typed
                 self.enemy_bullet_sprites_list.append(enemybullet);self.all_sprites_list.append(enemybullet)
-            
+                
+        for enemybullet in self.enemy_bullet_sprites_list:
+            if enemybullet.top<0:
+                enemybullet.kill()
+                
         def upgrade(typed,images,mul):
             upgrade = Greenfoot(images, SCALE*mul)
             upgrade.type = typed
@@ -184,7 +188,7 @@ class SpaceGameWindow(arcade.Window):
             self.fence_sprites_list.append(fence)
             self.all_sprites_list.append(fence)
 
-        if self.framecount%160==0 and self.BOSS==False and STATUS!='monkey.':
+        if self.framecount%160==0 and self.BOSS==False and STATUS!='monkey.' and STATUS!='human.':
             spawnenemy('Jaruad2.py',self.current_lv*2,self.current_lv*2,self.current_lv*2)
         if self.framecount%12==0 and self.current_lv<=6:#lv 1-6
             spawnenemy('Vanilla Tank',1,1,1)
@@ -219,7 +223,7 @@ class SpaceGameWindow(arcade.Window):
         if self.framecount%170==0 and self.current_lv>=14 and self.BOSS==False:#lv 14
             spawnenemy('Black Tank',35,-666,100)
         if 'timewizard' in self.boss_list and self.current_lv>=15:#BOSS (LV 15)
-            self.boss_list.remove('timewizard');spawnenemy('Sakuya Izayoi',500,-666,600);self.hp = 750
+            self.boss_list.remove('timewizard');spawnenemy('Sakuya Izayoi',500,-666,600);self.hp = int(600/MUL)
         #spawnenemy(ชื่อ,hp,damage เวลาชน,คะแนนที่ได้เวลาฆ่า)
             
         for enemy in self.enemy_sprites_list:#ศัตรูตัวที่มีลูกเล่นพิเศษ
@@ -424,9 +428,6 @@ class SpaceGameWindow(arcade.Window):
                 else:
                     self.hp-=enemybullet.damage
                     print("Got hit by",enemybullet.type,"! hp-",enemybullet.damage)
-                enemybullet.kill()
-        for enemybullet in self.enemy_bullet_sprites_list:
-            if enemybullet.top<0:
                 enemybullet.kill()
 
         #gameover status
